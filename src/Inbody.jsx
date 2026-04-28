@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { initializeApp, getApps } from "firebase/app";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 const firebaseConfig = {
@@ -63,6 +63,7 @@ export default function Inbody() {
   const [form, setForm] = useState({
     date: today(),
     weight: "", muscle: "", fat: "", fatmass: "",
+    condition: "",
   });
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function Inbody() {
   }, [memberId]);
 
   const [editingIdx, setEditingIdx] = useState(null);
-  const [editForm, setEditForm] = useState({ date: "", weight: "", muscle: "", fat: "", fatmass: "" });
+  const [editForm, setEditForm] = useState({ date: "", weight: "", muscle: "", fat: "", fatmass: "", condition: "" });
 
   const handleEditStart = (d, idx) => {
     setEditingIdx(idx);
@@ -83,6 +84,7 @@ export default function Inbody() {
       muscle: d.muscle ?? "",
       fat: d.fat ?? "",
       fatmass: d.fatmass ?? "",
+      condition: d.condition ?? "",
     });
   };
 
@@ -95,6 +97,7 @@ export default function Inbody() {
       muscle: parseFloat(editForm.muscle) || null,
       fat: parseFloat(editForm.fat) || null,
       fatmass: parseFloat(editForm.fatmass) || null,
+      condition: editForm.condition || null,
     };
     const sorted = updated.sort((a, b) => a.date.localeCompare(b.date));
     await updateDoc(doc(db, "members", memberId), { inbody: sorted });
@@ -122,6 +125,8 @@ export default function Inbody() {
         muscle: parseFloat(form.muscle) || null,
         fat: parseFloat(form.fat) || null,
         fatmass: parseFloat(form.fatmass) || null,
+        condition: form.condition || null,
+        updatedAt: new Date().toISOString(),
       };
       const updatedInbody = [...(member.inbody || []), newEntry]
         .sort((a, b) => a.date.localeCompare(b.date));
@@ -146,15 +151,20 @@ export default function Inbody() {
     </div>
   );
 
-  const inbodyData = (member.inbody || []).sort((a, b) => a.date.localeCompare(b.date));
+  const conditionMap = { "😴": 1, "😐": 2, "🙂": 3, "😊": 4, "💪": 5 };
+  const conditionLabel = { 1: "😴", 2: "😐", 3: "🙂", 4: "😊", 5: "💪" };
+
+  const inbodyData = [...(member.inbody || [])].sort((a, b) => a.date.localeCompare(b.date));
   const latest = inbodyData.length > 0 ? inbodyData[inbodyData.length - 1] : null;
   const first = inbodyData.length > 1 ? inbodyData[0] : null;
-  const chartData = inbodyData.map(d => ({
+  const chartData = [...inbodyData].sort((a, b) => a.date.localeCompare(b.date)).map(d => ({
     date: formatDateShort(d.date),
-    체중: d.weight,
-    골격근량: d.muscle,
-    체지방률: d.fat,
-    체지방량: d.fatmass,
+    체중: d.weight ? Number(d.weight) : null,
+    골격근량: d.muscle ? Number(d.muscle) : null,
+    체지방률: d.fat ? Number(d.fat) : null,
+    체지방량: d.fatmass ? Number(d.fatmass) : null,
+    컨디션: d.condition ? conditionMap[d.condition] : null,
+    컨디션이모지: d.condition || null,
   }));
 
   return (
@@ -228,7 +238,7 @@ export default function Inbody() {
                   ))}
                 </div>
               </div>
-              <button onClick={() => { setDone(false); setForm({ date: today(), weight: "", muscle: "", fat: "", fatmass: "" }); setTab("graph"); }}
+              <button onClick={() => { setDone(false); setForm({ date: today(), weight: "", muscle: "", fat: "", fatmass: "", condition: "" }); setTab("graph"); }}
                 style={{ marginTop: 20, background: "#151821", border: "1px solid #2A2D3E", borderRadius: 12, padding: "12px 24px", color: "#888", fontFamily: font, fontSize: 14, cursor: "pointer" }}>
                 📈 그래프 보기
               </button>
@@ -266,6 +276,22 @@ export default function Inbody() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* 컨디션 */}
+              <div style={{ marginBottom: 24 }}>
+                <label style={{ fontSize: 13, color: "#888", display: "block", marginBottom: 10 }}>오늘 컨디션</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {["😴", "😐", "🙂", "😊", "💪"].map(e => (
+                    <button key={e} type="button" onClick={() => setForm({ ...form, condition: form.condition === e ? "" : e })}
+                      style={{ flex: 1, padding: "12px 0", fontSize: 24, borderRadius: 12, border: "2px solid " + (form.condition === e ? "#4ECDC4" : "#2A2D3E"), background: form.condition === e ? "#4ECDC422" : "#151821", cursor: "pointer", transition: "all 0.15s" }}>
+                      {e}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, fontSize: 10, color: "#444" }}>
+                  <span>최악</span><span>최고</span>
+                </div>
               </div>
 
               {/* 이전 기록 */}
@@ -369,6 +395,36 @@ export default function Inbody() {
                   </ResponsiveContainer>
                 </div>
 
+                {/* 컨디션 그래프 */}
+                {chartData.some(d => d.컨디션 !== null) && (
+                  <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: "16px", marginBottom: 14 }}>
+                    <p style={{ fontSize: 12, color: "#F9CA24", fontWeight: 700, marginBottom: 14 }}>🌟 컨디션 변화</p>
+                    <ResponsiveContainer width="100%" height={140}>
+                      <LineChart data={chartData}>
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#555" }} />
+                        <YAxis tick={{ fontSize: 10, fill: "#555" }} domain={[0, 6]} ticks={[1,2,3,4,5]}
+                          tickFormatter={v => conditionLabel[v] || ""} />
+                        <Tooltip content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <div style={{ background: "#1A1D27", border: "1px solid #2A2D3E", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>
+                              <div style={{ color: "#888", marginBottom: 4 }}>{d.date}</div>
+                              <div style={{ fontSize: 20 }}>{d.컨디션이모지 || "-"}</div>
+                            </div>
+                          );
+                        }} />
+                        <Line type="monotone" dataKey="컨디션" stroke="#F9CA24" strokeWidth={2} dot={({ cx, cy, payload }) => (
+                          <text key={payload.date} x={cx} y={cy + 5} textAnchor="middle" fontSize={16}>{payload.컨디션이모지 || ""}</text>
+                        )} name="컨디션" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "0 8px", fontSize: 10, color: "#444" }}>
+                      <span>😴 최악</span><span>😐</span><span>🙂</span><span>😊</span><span>💪 최고</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* 기록 히스토리 */}
                 <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: "16px" }}>
                   <p style={{ fontSize: 12, color: "#888", fontWeight: 700, marginBottom: 12 }}>📅 전체 기록</p>
@@ -401,6 +457,17 @@ export default function Inbody() {
                               </div>
                             ))}
                           </div>
+                          <div style={{ marginBottom: 10 }}>
+                            <div style={{ fontSize: 11, color: "#888", marginBottom: 6 }}>컨디션</div>
+                            <div style={{ display: "flex", gap: 6 }}>
+                              {["😴", "😐", "🙂", "😊", "💪"].map(e => (
+                                <button key={e} type="button" onClick={() => setEditForm({ ...editForm, condition: editForm.condition === e ? "" : e })}
+                                  style={{ flex: 1, padding: "8px 0", fontSize: 20, borderRadius: 10, border: "2px solid " + (editForm.condition === e ? "#4ECDC4" : "#2A2D3E"), background: editForm.condition === e ? "#4ECDC422" : "#0F1117", cursor: "pointer" }}>
+                                  {e}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                             <button onClick={() => setEditingIdx(null)}
                               style={{ padding: "10px", background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 10, color: "#888", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: font }}>
@@ -416,7 +483,10 @@ export default function Inbody() {
                         // 일반 모드
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                           <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 11, color: "#555", marginBottom: 6 }}>{formatDate(d.date)}</div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                              <div style={{ fontSize: 11, color: "#555" }}>{formatDate(d.date)}</div>
+                              {d.condition && <div style={{ fontSize: 18 }}>{d.condition}</div>}
+                            </div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 }}>
                               {[
                                 { value: d.weight, unit: "kg", color: "#4ECDC4" },

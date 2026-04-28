@@ -59,7 +59,7 @@ const iStyle = {
 };
 
 const Label = ({ children, required }) => (
-  <div style={{ fontSize: 13, color: "#888", marginBottom: 8 }}>
+  <div style={{ fontSize: 13, color: "#C0C0C0", marginBottom: 8, fontWeight: 500 }}>
     {children}{required && <span style={{ color: "#4ECDC4", marginLeft: 3 }}>*</span>}
   </div>
 );
@@ -81,7 +81,7 @@ const ChipGroup = ({ options, value, onChange, multi }) => (
             onChange(selected ? cur.filter(x => x !== v) : [...cur, v]);
           } else onChange(selected ? "" : v);
         }}
-          style={{ padding: "10px 18px", border: "1px solid " + (selected ? "#4ECDC4" : "#2A2D3E"), borderRadius: 100, background: selected ? "#4ECDC422" : "#1A1D27", color: selected ? "#4ECDC4" : "#888", fontWeight: selected ? 700 : 400, fontSize: 14, cursor: "pointer", fontFamily: font, transition: "all 0.18s" }}>
+          style={{ padding: "10px 18px", border: "1px solid " + (selected ? "#4ECDC4" : "#2A2D3E"), borderRadius: 100, background: selected ? "#4ECDC422" : "#1A1D27", color: selected ? "#4ECDC4" : "#C0C0C0", fontWeight: selected ? 700 : 400, fontSize: 14, cursor: "pointer", fontFamily: font, transition: "all 0.18s" }}>
           {selected && multi ? "✓ " : ""}{label}
         </button>
       );
@@ -94,12 +94,12 @@ const ScaleGroup = ({ value, onChange, lowLabel, highLabel }) => (
     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
       {[1,2,3,4,5,6,7,8,9,10].map(n => (
         <button key={n} type="button" onClick={() => onChange(String(n))}
-          style={{ width: 44, height: 44, border: "1px solid " + (value === String(n) ? "#4ECDC4" : "#2A2D3E"), borderRadius: 10, background: value === String(n) ? "#4ECDC422" : "#1A1D27", color: value === String(n) ? "#4ECDC4" : "#888", fontWeight: value === String(n) ? 700 : 400, fontSize: 15, cursor: "pointer", fontFamily: font }}>
+          style={{ width: 44, height: 44, border: "1px solid " + (value === String(n) ? "#4ECDC4" : "#2A2D3E"), borderRadius: 10, background: value === String(n) ? "#4ECDC422" : "#1A1D27", color: value === String(n) ? "#4ECDC4" : "#C0C0C0", fontWeight: value === String(n) ? 700 : 400, fontSize: 15, cursor: "pointer", fontFamily: font }}>
           {n}
         </button>
       ))}
     </div>
-    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: "#555" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: "#888" }}>
       <span>{lowLabel}</span><span>{highLabel}</span>
     </div>
   </div>
@@ -107,7 +107,7 @@ const ScaleGroup = ({ value, onChange, lowLabel, highLabel }) => (
 
 const YesNo = ({ value, onChange, label, index, color = "#4ECDC4" }) => (
   <div style={{ marginBottom: 12, background: "#151821", border: "1px solid #2A2D3E", borderRadius: 12, padding: "14px 16px" }}>
-    <p style={{ margin: "0 0 12px", fontSize: 14, lineHeight: 1.6, color: "#E8E8E8", fontFamily: font }}>
+    <p style={{ margin: "0 0 12px", fontSize: 14, lineHeight: 1.6, color: "#E8E8E8", fontFamily: font, fontWeight: 500 }}>
       {index && <span style={{ color, fontWeight: 700, marginRight: 8 }}>{index}.</span>}{label}
     </p>
     <div style={{ display: "flex", gap: 10 }}>
@@ -116,7 +116,7 @@ const YesNo = ({ value, onChange, label, index, color = "#4ECDC4" }) => (
         const sel = value === isYes;
         return (
           <button key={opt} type="button" onClick={() => onChange(isYes)}
-            style={{ flex: 1, padding: "10px", border: "2px solid " + (sel ? (isYes ? "#FF6B6B" : "#4ECDC4") : "#2A2D3E"), borderRadius: 10, background: sel ? (isYes ? "#FF6B6B22" : "#4ECDC422") : "#0F1117", color: sel ? (isYes ? "#FF6B6B" : "#4ECDC4") : "#888", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>
+            style={{ flex: 1, padding: "10px", border: "2px solid " + (sel ? (isYes ? "#FF6B6B" : "#4ECDC4") : "#2A2D3E"), borderRadius: 10, background: sel ? (isYes ? "#FF6B6B22" : "#4ECDC422") : "#0F1117", color: sel ? (isYes ? "#FF6B6B" : "#4ECDC4") : "#C0C0C0", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>
             {opt}
           </button>
         );
@@ -139,88 +139,191 @@ const Card = ({ children }) => (
 );
 
 // ─── 통증 맵 ───
-const ZONES = [
-  { id: "head", label: "머리·목", style: { top: "0%", left: "30%", width: "42%", height: "19%" } },
-  { id: "shoulder-l", label: "왼쪽 어깨", style: { top: "18%", left: "6%", width: "22%", height: "14%" } },
-  { id: "shoulder-r", label: "오른쪽 어깨", style: { top: "18%", right: "6%", width: "22%", height: "14%" } },
-  { id: "chest", label: "가슴·상체", style: { top: "19%", left: "26%", width: "48%", height: "16%" } },
-  { id: "back", label: "허리·복부", style: { top: "36%", left: "26%", width: "48%", height: "14%" } },
-  { id: "elbow-l", label: "왼쪽 팔꿈치", style: { top: "37%", left: "3%", width: "18%", height: "14%" } },
-  { id: "elbow-r", label: "오른쪽 팔꿈치", style: { top: "37%", right: "3%", width: "18%", height: "14%" } },
-  { id: "wrist-l", label: "왼쪽 손목", style: { top: "52%", left: "4%", width: "15%", height: "10%" } },
-  { id: "wrist-r", label: "오른쪽 손목", style: { top: "52%", right: "4%", width: "15%", height: "10%" } },
-  { id: "hip", label: "골반·엉덩이", style: { top: "50%", left: "26%", width: "48%", height: "10%" } },
-  { id: "knee-l", label: "왼쪽 무릎", style: { top: "72%", left: "22%", width: "18%", height: "9%" } },
-  { id: "knee-r", label: "오른쪽 무릎", style: { top: "72%", right: "22%", width: "18%", height: "9%" } },
-  { id: "ankle-l", label: "왼쪽 발목", style: { top: "87%", left: "18%", width: "18%", height: "10%" } },
-  { id: "ankle-r", label: "오른쪽 발목", style: { top: "87%", right: "18%", width: "18%", height: "10%" } },
+const FRONT_ZONES = [
+  { id: "head",      label: "머리",           sub: null,       style: { top: "0%",   left: "30%",  width: "40%", height: "17%" } },
+  { id: "neck",      label: "목",             sub: null,       style: { top: "17%",  left: "38%",  width: "24%", height: "8%"  } },
+  { id: "sh-l",      label: "왼쪽 어깨",      sub: "shoulder", style: { top: "18%",  left: "7%",   width: "20%", height: "12%" } },
+  { id: "sh-r",      label: "오른쪽 어깨",    sub: "shoulder", style: { top: "18%",  right: "7%",  width: "20%", height: "12%" } },
+  { id: "chest",     label: "가슴",           sub: null,       style: { top: "25%",  left: "27%",  width: "46%", height: "13%" } },
+  { id: "abd",       label: "복부",           sub: null,       style: { top: "38%",  left: "27%",  width: "46%", height: "12%" } },
+  { id: "el-l",      label: "왼쪽 팔꿈치",    sub: "elbow",    style: { top: "37%",  left: "3%",   width: "16%", height: "12%" } },
+  { id: "el-r",      label: "오른쪽 팔꿈치",  sub: "elbow",    style: { top: "37%",  right: "3%",  width: "16%", height: "12%" } },
+  { id: "wr-l",      label: "왼쪽 손목",      sub: "wrist",    style: { top: "52%",  left: "3%",   width: "14%", height: "9%"  } },
+  { id: "wr-r",      label: "오른쪽 손목",    sub: "wrist",    style: { top: "52%",  right: "3%",  width: "14%", height: "9%"  } },
+  { id: "th-l",      label: "왼쪽 허벅지",    sub: null,       style: { top: "57%",  left: "22%",  width: "20%", height: "14%" } },
+  { id: "th-r",      label: "오른쪽 허벅지",  sub: null,       style: { top: "57%",  right: "22%", width: "20%", height: "14%" } },
+  { id: "kn-l",      label: "왼쪽 무릎",      sub: "knee",     style: { top: "72%",  left: "22%",  width: "18%", height: "10%" } },
+  { id: "kn-r",      label: "오른쪽 무릎",    sub: "knee",     style: { top: "72%",  right: "22%", width: "18%", height: "10%" } },
+  { id: "ank-l",     label: "왼쪽 발목",      sub: "ankle",    style: { top: "87%",  left: "18%",  width: "18%", height: "9%"  } },
+  { id: "ank-r",     label: "오른쪽 발목",    sub: "ankle",    style: { top: "87%",  right: "18%", width: "18%", height: "9%"  } },
 ];
 
-const BodyMap = ({ value = [], onChange, noPain, onNoPain }) => (
-  <div>
-    <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
-      <div style={{ position: "relative", width: 180, flexShrink: 0 }}>
-        <svg viewBox="0 0 200 480" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", display: "block" }}>
-          <ellipse cx="100" cy="40" rx="28" ry="34" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <rect x="89" y="72" width="22" height="20" rx="4" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <path d="M68 92 Q55 96 52 120 L48 200 Q47 216 68 220 L132 220 Q153 216 152 200 L148 120 Q145 96 132 92 Z" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <path d="M72 96 Q100 108 128 96" stroke="#3a3a50" strokeWidth="1.2" fill="none"/>
-          <line x1="100" y1="100" x2="100" y2="195" stroke="#3a3a50" strokeWidth="1"/>
-          <path d="M68 95 Q50 100 44 140 Q40 170 42 200" stroke="#3a3a50" strokeWidth="14" strokeLinecap="round" fill="none"/>
-          <path d="M68 95 Q50 100 44 140 Q40 170 42 200" stroke="#2a2a3a" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <path d="M132 95 Q150 100 156 140 Q160 170 158 200" stroke="#3a3a50" strokeWidth="14" strokeLinecap="round" fill="none"/>
-          <path d="M132 95 Q150 100 156 140 Q160 170 158 200" stroke="#2a2a3a" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <path d="M42 200 Q38 230 36 265" stroke="#3a3a50" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <path d="M42 200 Q38 230 36 265" stroke="#2a2a3a" strokeWidth="10" strokeLinecap="round" fill="none"/>
-          <path d="M158 200 Q162 230 164 265" stroke="#3a3a50" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <path d="M158 200 Q162 230 164 265" stroke="#2a2a3a" strokeWidth="10" strokeLinecap="round" fill="none"/>
-          <ellipse cx="35" cy="275" rx="10" ry="14" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <ellipse cx="165" cy="275" rx="10" ry="14" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <path d="M68 220 Q55 230 54 250 Q53 268 68 272 L132 272 Q147 268 146 250 Q145 230 132 220 Z" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <path d="M80 272 Q72 310 70 360" stroke="#3a3a50" strokeWidth="18" strokeLinecap="round" fill="none"/>
-          <path d="M80 272 Q72 310 70 360" stroke="#2a2a3a" strokeWidth="16" strokeLinecap="round" fill="none"/>
-          <path d="M120 272 Q128 310 130 360" stroke="#3a3a50" strokeWidth="18" strokeLinecap="round" fill="none"/>
-          <path d="M120 272 Q128 310 130 360" stroke="#2a2a3a" strokeWidth="16" strokeLinecap="round" fill="none"/>
-          <path d="M70 360 Q66 400 65 440" stroke="#3a3a50" strokeWidth="14" strokeLinecap="round" fill="none"/>
-          <path d="M70 360 Q66 400 65 440" stroke="#2a2a3a" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <path d="M130 360 Q134 400 135 440" stroke="#3a3a50" strokeWidth="14" strokeLinecap="round" fill="none"/>
-          <path d="M130 360 Q134 400 135 440" stroke="#2a2a3a" strokeWidth="12" strokeLinecap="round" fill="none"/>
-          <ellipse cx="63" cy="453" rx="16" ry="10" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <ellipse cx="137" cy="453" rx="16" ry="10" fill="#2a2a3a" stroke="#3a3a50" strokeWidth="1.5"/>
-          <circle cx="70" cy="360" r="6" fill="#232330" stroke="#3a3a50" strokeWidth="1.2"/>
-          <circle cx="130" cy="360" r="6" fill="#232330" stroke="#3a3a50" strokeWidth="1.2"/>
-        </svg>
-        {ZONES.map(z => {
-          const active = value.includes(z.id);
-          return (
-            <div key={z.id} onClick={() => { onNoPain(false); onChange(active ? value.filter(x => x !== z.id) : [...value, z.id]); }}
-              style={{ position: "absolute", borderRadius: "50%", cursor: "pointer", border: "2px solid " + (active ? "#FF6B6B" : "transparent"), background: active ? "rgba(255,107,107,0.4)" : "transparent", boxShadow: active ? "0 0 12px rgba(255,107,107,0.5)" : "none", transition: "all 0.2s", ...z.style }} />
-          );
-        })}
+const BACK_ZONES = [
+  { id: "trap",      label: "승모근",          sub: null,       style: { top: "18%",  left: "18%",  width: "64%", height: "10%" } },
+  { id: "upback",    label: "등 위",           sub: null,       style: { top: "28%",  left: "27%",  width: "46%", height: "12%" } },
+  { id: "lowback",   label: "허리",            sub: null,       style: { top: "40%",  left: "27%",  width: "46%", height: "10%" } },
+  { id: "el-b",      label: "팔꿈치",          sub: "elbow",    style: { top: "37%",  left: "3%",   width: "16%", height: "12%" } },
+  { id: "glute-l",   label: "왼쪽 골반",       sub: null,       style: { top: "51%",  left: "22%",  width: "22%", height: "10%" } },
+  { id: "glute-r",   label: "오른쪽 골반",     sub: null,       style: { top: "51%",  right: "22%", width: "22%", height: "10%" } },
+  { id: "ham-l",     label: "왼쪽 햄스트링",   sub: null,       style: { top: "61%",  left: "22%",  width: "20%", height: "12%" } },
+  { id: "ham-r",     label: "오른쪽 햄스트링", sub: null,       style: { top: "61%",  right: "22%", width: "20%", height: "12%" } },
+  { id: "kn-bl",     label: "왼쪽 무릎 뒤",    sub: "knee",     style: { top: "72%",  left: "22%",  width: "18%", height: "10%" } },
+  { id: "kn-br",     label: "오른쪽 무릎 뒤",  sub: "knee",     style: { top: "72%",  right: "22%", width: "18%", height: "10%" } },
+  { id: "cal-l",     label: "왼쪽 종아리",     sub: null,       style: { top: "82%",  left: "20%",  width: "18%", height: "10%" } },
+  { id: "cal-r",     label: "오른쪽 종아리",   sub: null,       style: { top: "82%",  right: "20%", width: "18%", height: "10%" } },
+];
+
+const SUB_OPTS = {
+  elbow:    ["안쪽", "바깥쪽", "전체"],
+  knee:     ["안쪽", "바깥쪽", "앞쪽", "뒤쪽(오금)", "전체"],
+  shoulder: ["앞쪽", "뒤쪽", "위쪽", "전체"],
+  wrist:    ["안쪽", "바깥쪽", "전체"],
+  ankle:    ["안쪽", "바깥쪽", "앞쪽", "전체"],
+};
+
+const BodyMap = ({ value = [], onChange, noPain, onNoPain, gender }) => {
+  const [bodySide, setBodySide] = useState("front");
+  const [subModal, setSubModal] = useState(null); // { id, label, subKey }
+  const [subSelected, setSubSelected] = useState([]);
+
+  const zones = bodySide === "front" ? FRONT_ZONES : BACK_ZONES;
+  const bodyColor = gender === "남성" ? "#4A90D9" : gender === "여성" ? "#E87490" : "#3a3a50";
+  const bodyStroke = gender === "남성" ? "#3472B0" : gender === "여성" ? "#C45A74" : "#4a4a60";
+
+  const handleZoneClick = (z) => {
+    onNoPain(false);
+    const ids = value.map(v => typeof v === "string" ? v : v.id);
+    if (ids.includes(z.id)) {
+      onChange(value.filter(v => (typeof v === "string" ? v : v.id) !== z.id));
+    } else {
+      if (z.sub && SUB_OPTS[z.sub]) {
+        setSubModal(z);
+        setSubSelected([]);
+      } else {
+        onChange([...value, { id: z.id, label: z.label, sub: [] }]);
+      }
+    }
+  };
+
+  const confirmSub = () => {
+    onChange([...value, { id: subModal.id, label: subModal.label, sub: subSelected }]);
+    setSubModal(null);
+  };
+
+  const getLabel = (v) => {
+    if (typeof v === "string") return v;
+    return v.sub && v.sub.length ? `${v.label} (${v.sub.join("/")})` : v.label;
+  };
+
+  const getId = (v) => typeof v === "string" ? v : v.id;
+
+  return (
+    <div>
+      {/* 앞뒤 탭 */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 12 }}>
+        {["front", "back"].map(s => (
+          <button key={s} type="button" onClick={() => setBodySide(s)}
+            style={{ padding: "8px", borderRadius: 8, border: "1px solid " + (bodySide === s ? "#888" : "#2A2D3E"), background: bodySide === s ? "#ffffff10" : "#0F1117", color: bodySide === s ? "#E8E8E8" : "#555", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: font }}>
+            {s === "front" ? "앞면" : "뒷면"}
+          </button>
+        ))}
       </div>
-      <div style={{ flex: 1, minWidth: 140 }}>
-        <div style={{ fontSize: 12, color: "#888", marginBottom: 10 }}>선택된 부위</div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, minHeight: 40 }}>
-          {value.length === 0 && !noPain && <span style={{ fontSize: 13, color: "#555", fontStyle: "italic" }}>부위를 터치해주세요</span>}
-          {noPain && <span style={{ fontSize: 13, color: "#4ECDC4", fontWeight: 600 }}>✓ 통증 없음</span>}
-          {value.map(id => {
-            const z = ZONES.find(z => z.id === id);
+
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+        <div style={{ position: "relative", width: 180, flexShrink: 0 }}>
+          <svg viewBox="0 0 200 480" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", display: "block" }}>
+            {/* 머리 */}
+            <ellipse cx="100" cy="40" rx="28" ry="34" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.85"/>
+            {/* 목 */}
+            <rect x="89" y="72" width="22" height="20" rx="4" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.85"/>
+            {/* 몸통 */}
+            <path d="M68 92 Q55 96 52 120 L48 200 Q47 216 68 220 L132 220 Q153 216 152 200 L148 120 Q145 96 132 92 Z" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.85"/>
+            {/* 몸통 라인 */}
+            <path d="M72 96 Q100 108 128 96" stroke={bodyStroke} strokeWidth="1.2" fill="none" opacity="0.5"/>
+            <line x1="100" y1="100" x2="100" y2="195" stroke={bodyStroke} strokeWidth="1" opacity="0.4"/>
+            {/* 팔 */}
+            <path d="M68 95 Q50 100 44 140 Q40 170 42 200" stroke={bodyColor} strokeWidth="14" strokeLinecap="round" fill="none" opacity="0.9"/>
+            <path d="M132 95 Q150 100 156 140 Q160 170 158 200" stroke={bodyColor} strokeWidth="14" strokeLinecap="round" fill="none" opacity="0.9"/>
+            {/* 손 */}
+            <path d="M42 200 Q38 230 36 265" stroke={bodyColor} strokeWidth="12" strokeLinecap="round" fill="none" opacity="0.85"/>
+            <path d="M158 200 Q162 230 164 265" stroke={bodyColor} strokeWidth="12" strokeLinecap="round" fill="none" opacity="0.85"/>
+            <ellipse cx="35" cy="275" rx="10" ry="14" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.8"/>
+            <ellipse cx="165" cy="275" rx="10" ry="14" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.8"/>
+            {/* 골반 */}
+            <path d="M68 220 Q55 230 54 250 Q53 268 68 272 L132 272 Q147 268 146 250 Q145 230 132 220 Z" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.75"/>
+            {/* 다리 */}
+            <path d="M80 272 Q72 310 70 360" stroke={bodyColor} strokeWidth="18" strokeLinecap="round" fill="none" opacity="0.9"/>
+            <path d="M120 272 Q128 310 130 360" stroke={bodyColor} strokeWidth="18" strokeLinecap="round" fill="none" opacity="0.9"/>
+            <path d="M70 360 Q66 400 65 440" stroke={bodyColor} strokeWidth="14" strokeLinecap="round" fill="none" opacity="0.9"/>
+            <path d="M130 360 Q134 400 135 440" stroke={bodyColor} strokeWidth="14" strokeLinecap="round" fill="none" opacity="0.9"/>
+            {/* 발 */}
+            <ellipse cx="63" cy="453" rx="16" ry="10" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.8"/>
+            <ellipse cx="137" cy="453" rx="16" ry="10" fill={bodyColor} stroke={bodyStroke} strokeWidth="1.5" opacity="0.8"/>
+            {/* 무릎 */}
+            <circle cx="70" cy="360" r="6" fill={bodyStroke} opacity="0.5"/>
+            <circle cx="130" cy="360" r="6" fill={bodyStroke} opacity="0.5"/>
+          </svg>
+          {/* 클릭 존 */}
+          {zones.map(z => {
+            const active = value.some(v => getId(v) === z.id);
             return (
-              <span key={id} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,107,107,0.15)", border: "1px solid #FF6B6B", borderRadius: 100, padding: "4px 12px", fontSize: 12, color: "#FF6B6B", fontFamily: font }}>
-                {z?.label}
-                <button type="button" onClick={() => onChange(value.filter(x => x !== id))} style={{ background: "none", border: "none", color: "#FF6B6B", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
-              </span>
+              <div key={z.id} onClick={() => handleZoneClick(z)}
+                style={{ position: "absolute", borderRadius: "50%", cursor: "pointer",
+                  border: "2px dashed " + (active ? "#FF6B6B" : "#FFE600"),
+                  background: active ? "rgba(255,107,107,0.4)" : "transparent",
+                  boxShadow: active ? "0 0 12px rgba(255,107,107,0.5)" : "none",
+                  transition: "all 0.2s", ...z.style }} />
             );
           })}
         </div>
-        <button type="button" onClick={() => { onChange([]); onNoPain(!noPain); }}
-          style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6, background: noPain ? "rgba(80,200,240,0.1)" : "#1A1D27", border: "1px solid " + (noPain ? "#4ECDC4" : "#2A2D3E"), borderRadius: 100, padding: "8px 16px", cursor: "pointer", fontSize: 13, color: noPain ? "#4ECDC4" : "#888", fontFamily: font }}>
-          통증 없음
-        </button>
+
+        <div style={{ flex: 1, minWidth: 140 }}>
+          <div style={{ fontSize: 12, color: "#888", marginBottom: 10 }}>선택된 부위</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, minHeight: 40 }}>
+            {value.length === 0 && !noPain && <span style={{ fontSize: 13, color: "#555", fontStyle: "italic" }}>부위를 터치해주세요</span>}
+            {noPain && <span style={{ fontSize: 13, color: "#4ECDC4", fontWeight: 600 }}>✓ 통증 없음</span>}
+            {value.map((v, i) => (
+              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,107,107,0.15)", border: "1px solid #FF6B6B", borderRadius: 100, padding: "4px 12px", fontSize: 12, color: "#FF6B6B", fontFamily: font }}>
+                {getLabel(v)}
+                <button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#FF6B6B", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
+              </span>
+            ))}
+          </div>
+          <button type="button" onClick={() => { onChange([]); onNoPain(!noPain); }}
+            style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 6, background: noPain ? "rgba(80,200,240,0.1)" : "#1A1D27", border: "1px solid " + (noPain ? "#4ECDC4" : "#2A2D3E"), borderRadius: 100, padding: "8px 16px", cursor: "pointer", fontSize: 13, color: noPain ? "#4ECDC4" : "#888", fontFamily: font }}>
+            통증 없음
+          </button>
+        </div>
       </div>
+
+      {/* 세부 선택 모달 */}
+      {subModal && (
+        <div style={{ position: "fixed", inset: 0, background: "#000000bb", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          onClick={() => setSubModal(null)}>
+          <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: "20px 20px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 480 }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>📍 {subModal.label}</div>
+            <div style={{ fontSize: 12, color: "#555", marginBottom: 16 }}>더 자세한 위치를 선택해주세요 (선택 안 해도 됩니다)</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+              {SUB_OPTS[subModal.sub].map(o => (
+                <button key={o} type="button" onClick={() => setSubSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o])}
+                  style={{ background: subSelected.includes(o) ? "#FF6B6B18" : "#0F1117", border: "1px solid " + (subSelected.includes(o) ? "#FF6B6B" : "#2A2D3E"), borderRadius: 12, padding: "13px 16px", cursor: "pointer", fontSize: 14, color: subSelected.includes(o) ? "#FF6B6B" : "#E8E8E8", fontFamily: font, fontWeight: subSelected.includes(o) ? 700 : 400, textAlign: "left" }}>
+                  {o}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <button type="button" onClick={() => setSubModal(null)}
+                style={{ background: "#2A2D3E", border: "none", borderRadius: 12, padding: 14, color: "#888", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>그냥 저장</button>
+              <button type="button" onClick={confirmSub}
+                style={{ background: "#FF6B6B", border: "none", borderRadius: 12, padding: 14, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>선택 완료</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 // ─── 서명 패드 ───
 const SignaturePad = ({ onSave }) => {
@@ -283,10 +386,13 @@ export default function Survey() {
   const isEditMode = searchParams.get("edit") === "1";
   const isNewMember = memberId === "new";
   const [member, setMember] = useState(null);
+  const [trainerName, setTrainerName] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // step: 0=PT설문지, 1=PAR-Q, 2=PAR-Q+(그렇다시), 3=서명, 4=완료
+  // step: 0=PT설문지, 1=PAR-Q, 2=PAR-Q+(그렇다시), 3=개인정보동의, 4=서명, 5=완료
   const [step, setStep] = useState(0);
+  const [agree1, setAgree1] = useState(false);
+  const [agree2, setAgree2] = useState(false);
 
   const [pt, setPt] = useState(emptyPt());
   const [parqAnswers, setParqAnswers] = useState(Array(7).fill(null));
@@ -305,6 +411,12 @@ export default function Survey() {
         const data = snap.data();
         setMember({ id: snap.id, ...data });
         setPt(emptyPt(data.name || ""));
+        // 트레이너 이름 가져오기
+        if (data.owner) {
+          getDoc(doc(db, "users", data.owner)).then(userSnap => {
+            if (userSnap.exists()) setTrainerName(userSnap.data().name || "");
+          }).catch(() => {});
+        }
       }
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -328,6 +440,36 @@ export default function Survey() {
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   const goNext = (n) => { setStep(n); scrollTop(); };
+  const [errors, setErrors] = useState({});
+
+  const scrollToError = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.style.outline = "2px solid #FF6B6B";
+      el.style.borderRadius = "10px";
+      setTimeout(() => { el.style.outline = "none"; }, 2000);
+    }
+  };
+
+  const handlePtNext = () => {
+    if (!pt.name.trim()) { scrollToError("field-name"); return; }
+    if (!pt.phone.trim()) { scrollToError("field-phone"); return; }
+    if (!pt.agree) { scrollToError("field-agree"); return; }
+    goNext(1);
+  };
+
+  const handleParqNextSafe = () => {
+    const idx = parqAnswers.findIndex(a => a === null);
+    if (idx !== -1) { scrollToError(`field-parq-${idx}`); return; }
+    handleParqNext();
+  };
+
+  const handleParqPlusNextSafe = () => {
+    const idx = parqPlusGeneral.findIndex(a => a === null);
+    if (idx !== -1) { scrollToError(`field-parqplus-${idx}`); return; }
+    goNext(3);
+  };
   const setPtField = (k, v) => setPt(prev => ({ ...prev, [k]: v }));
 
   const parqHasYes = parqAnswers.some(a => a === true);
@@ -335,7 +477,7 @@ export default function Survey() {
   const isParqPlusComplete = parqPlusGeneral.every(a => a !== null);
   const isPtBasicFilled = pt.name.trim() && pt.phone.trim() && pt.agree;
 
-  // PAR-Q 다음 누를 때: 하나라도 그렇다면 PAR-Q+로, 아니면 서명으로
+  // PAR-Q 다음 누를 때: 하나라도 그렇다면 PAR-Q+로, 아니면 개인정보 동의로
   const handleParqNext = () => {
     if (parqHasYes) goNext(2);
     else goNext(3);
@@ -370,7 +512,7 @@ export default function Survey() {
       let noteText = `설문지 작성으로 자동 등록. 연락처: ${pt.phone}`;
       if (pt.healthDetail) noteText += `\n건강상태: ${pt.healthDetail}`;
       if (pt.medication && pt.medication !== "없음") noteText += `\n복용약: ${pt.medication}`;
-      if (pt.painZones?.length > 0) noteText += `\n통증부위: ${pt.painZones.join(", ")}`;
+      if (pt.painZones?.length > 0) noteText += `\n통증부위: ${pt.painZones.map(v => typeof v === "string" ? v : (v.sub?.length ? `${v.label}(${v.sub.join("/")})` : v.label)).join(", ")}`;
       notes.push({ date: today, text: noteText });
 
       const memberData = {
@@ -378,6 +520,7 @@ export default function Survey() {
         age: calcAge(pt.birth),
         gender: pt.gender || "",
         purpose: pt.goal?.filter(g => g !== "기타") || [],
+        timeSlot: pt.timeSlot || [],
         registeredDate: today,
         notes,
         inbody: [],
@@ -397,6 +540,7 @@ export default function Survey() {
         if (!member?.age && memberData.age) updates.age = memberData.age;
         if (!member?.gender && memberData.gender) updates.gender = memberData.gender;
         if ((!member?.purpose || member.purpose.length === 0) && memberData.purpose.length > 0) updates.purpose = memberData.purpose;
+        if ((!member?.timeSlot || member.timeSlot.length === 0) && memberData.timeSlot.length > 0) updates.timeSlot = memberData.timeSlot;
         if (Object.keys(updates).length > 0) {
           await updateDoc(doc(db, "members", targetMemberId), updates);
         }
@@ -413,11 +557,13 @@ export default function Survey() {
         parqPlusHasYes: parqHasYes ? parqPlusGeneral.some(a => a === true) : false,
         parqPlusFollowup,
         disease4Note, disease5Note, disease6Note,
+        privacyAgree1: agree1,
+        privacyAgree2: agree2,
         signature,
         submittedAt: serverTimestamp(),
         status: "completed",
       });
-      setStep(4);
+      setStep(5);
     } catch (e) { console.error(e); }
     setSubmitting(false);
   };
@@ -436,8 +582,8 @@ export default function Survey() {
     </div>
   );
 
-  const STEP_LABELS = ["PT 설문지", "PAR-Q", parqHasYes ? "PAR-Q+" : "서명", "서명"];
-  const pct = Math.round((step / 4) * 100);
+  const STEP_LABELS = ["PT 설문지", "PAR-Q", parqHasYes ? "PAR-Q+" : "개인정보 동의", "개인정보 동의", "서명"];
+  const pct = Math.round((step / 5) * 100);
 
   return (
     <div style={{ minHeight: "100vh", background: "#0F1117", color: "#E8E8E8", fontFamily: font }}>
@@ -448,7 +594,7 @@ export default function Survey() {
         <div style={{ maxWidth: 560, margin: "0 auto" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 900, color: "#4ECDC4", letterSpacing: 4 }}>FORMA</span>
-            {step < 4 && <span style={{ fontSize: 12, color: isEditMode ? "#FFA500" : "#555" }}>{isEditMode ? "✏️ 수정 모드" : STEP_LABELS[Math.min(step, 3)]}</span>}
+            {step < 5 && <span style={{ fontSize: 12, color: isEditMode ? "#FFA500" : "#555" }}>{isEditMode ? "✏️ 수정 모드" : STEP_LABELS[Math.min(step, 4)]}</span>}
           </div>
           {step < 4 && (
             <div style={{ width: "100%", height: 4, background: "#1E2133", borderRadius: 4, overflow: "hidden" }}>
@@ -461,7 +607,7 @@ export default function Survey() {
       <main style={{ maxWidth: 560, margin: "0 auto", padding: "20px 16px 80px" }}>
 
         {/* ── 완료 ── */}
-        {step === 4 && (
+        {step === 5 && (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>✅</div>
             <h2 style={{ fontSize: 22, fontWeight: 900, marginBottom: 12 }}>{isEditMode ? "수정 완료!" : "설문지 제출 완료!"}</h2>
@@ -486,11 +632,11 @@ export default function Survey() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field>
                   <Label required>이름</Label>
-                  <input value={pt.name} onChange={e => setPtField("name", e.target.value)} placeholder="홍길동" style={iStyle} />
+                  <input id="field-name" value={pt.name} onChange={e => setPtField("name", e.target.value)} placeholder="홍길동" style={iStyle} />
                 </Field>
                 <Field>
                   <Label required>연락처</Label>
-                  <input value={pt.phone} onChange={e => setPtField("phone", e.target.value)} placeholder="010-0000-0000" style={iStyle} inputMode="tel" />
+                  <input id="field-phone" value={pt.phone} onChange={e => setPtField("phone", e.target.value)} placeholder="010-0000-0000" style={iStyle} inputMode="tel" />
                 </Field>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
@@ -545,7 +691,7 @@ export default function Survey() {
               </Field>
               <Field>
                 <Label>통증·불편한 부위 — 해당 부위를 직접 터치해주세요</Label>
-                <BodyMap value={pt.painZones} onChange={v => setPtField("painZones", v)} noPain={pt.noPain} onNoPain={v => setPtField("noPain", v)} />
+                <BodyMap value={pt.painZones} onChange={v => setPtField("painZones", v)} noPain={pt.noPain} onNoPain={v => setPtField("noPain", v)} gender={pt.gender} />
               </Field>
               <Field>
                 <Label>상세 설명 (수술 이력, 통증 강도 등)</Label>
@@ -600,7 +746,7 @@ export default function Survey() {
 
             {/* ⑨ 개인정보동의 */}
             <SectionTitle>개인정보 동의</SectionTitle>
-            <div onClick={() => setPtField("agree", !pt.agree)}
+            <div id="field-agree" onClick={() => setPtField("agree", !pt.agree)}
               style={{ display: "flex", alignItems: "flex-start", gap: 14, background: "#151821", border: "1px solid " + (pt.agree ? "#4ECDC4" : "#2A2D3E"), borderRadius: 12, padding: "16px 18px", cursor: "pointer", marginBottom: 24 }}>
               <div style={{ width: 24, height: 24, borderRadius: 6, border: "2px solid " + (pt.agree ? "#4ECDC4" : "#555"), background: pt.agree ? "#4ECDC4" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
                 {pt.agree && <span style={{ color: "#0F1117", fontWeight: 900, fontSize: 14 }}>✓</span>}
@@ -611,11 +757,11 @@ export default function Survey() {
               </div>
             </div>
 
-            <button onClick={() => goNext(1)} disabled={!isPtBasicFilled}
-              style={{ width: "100%", background: isPtBasicFilled ? "#4ECDC4" : "#2A2D3E", color: isPtBasicFilled ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "16px", fontWeight: 800, fontSize: 16, cursor: isPtBasicFilled ? "pointer" : "not-allowed", fontFamily: font }}>
+            <button onClick={handlePtNext}
+              style={{ width: "100%", background: isPtBasicFilled ? "#4ECDC4" : "#2A2D3E", color: isPtBasicFilled ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "16px", fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: font }}>
               다음 → PAR-Q 설문지
             </button>
-            {!isPtBasicFilled && <p style={{ textAlign: "center", fontSize: 12, color: "#555", marginTop: 8 }}>이름, 연락처 입력 및 개인정보 동의가 필요해요</p>}
+            {!isPtBasicFilled && <p style={{ textAlign: "center", fontSize: 12, color: "#FF6B6B", marginTop: 8 }}>미입력 항목을 눌러 확인해주세요</p>}
           </div>
         )}
 
@@ -627,22 +773,19 @@ export default function Survey() {
               <p style={{ margin: 0, fontSize: 13, color: "#888", lineHeight: 1.6 }}>각 문항에 정직하게 답해주세요. 하나라도 '그렇다'이면 추가 질문이 이어집니다.</p>
             </div>
             {PAR_Q_QUESTIONS.map((q, i) => (
-              <YesNo key={i} index={i + 1} label={q} value={parqAnswers[i]}
-                onChange={v => { const a = [...parqAnswers]; a[i] = v; setParqAnswers(a); }} />
+              <div key={i} id={`field-parq-${i}`}>
+                <YesNo index={i + 1} label={q} value={parqAnswers[i]}
+                  onChange={v => { const a = [...parqAnswers]; a[i] = v; setParqAnswers(a); }} />
+              </div>
             ))}
             <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
               <button onClick={() => goNext(0)} style={{ flex: 1, background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>← 이전</button>
-              <button onClick={handleParqNext} disabled={!isParqComplete}
-                style={{ flex: 2, background: isParqComplete ? "#4ECDC4" : "#2A2D3E", color: isParqComplete ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: 16, cursor: isParqComplete ? "pointer" : "not-allowed", fontFamily: font }}>
-                {isParqComplete ? (parqHasYes ? "다음 → PAR-Q+" : "다음 → 서명") : "다음 →"}
+              <button onClick={handleParqNextSafe}
+                style={{ flex: 2, background: isParqComplete ? "#4ECDC4" : "#2A2D3E", color: isParqComplete ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: font }}>
+                {isParqComplete ? (parqHasYes ? "다음 → PAR-Q+" : "다음 → 개인정보 동의") : "다음 →"}
               </button>
             </div>
-            {isParqComplete && parqHasYes && (
-              <p style={{ textAlign: "center", color: "#FF6B6B", fontSize: 13, marginTop: 10 }}>⚠️ 하나 이상 '그렇다' → PAR-Q+ 추가 질문이 있어요</p>
-            )}
-            {isParqComplete && !parqHasYes && (
-              <p style={{ textAlign: "center", color: "#4ECDC4", fontSize: 13, marginTop: 10 }}>✅ 모두 '아니다' → 바로 서명 단계로 이동해요</p>
-            )}
+            {!isParqComplete && <p style={{ textAlign: "center", fontSize: 12, color: "#FF6B6B", marginTop: 8 }}>미응답 항목을 눌러 확인해주세요</p>}
           </div>
         )}
 
@@ -658,7 +801,7 @@ export default function Survey() {
             <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 12, padding: "14px", marginBottom: 16 }}>
               <p style={{ fontSize: 13, color: "#A78BFA", fontWeight: 700, margin: "0 0 14px" }}>일반 건강 질문 (PAR-Q+ 1/4)</p>
               {PAR_Q_PLUS_GENERAL.map((q, i) => (
-                <div key={i}>
+                <div key={i} id={`field-parqplus-${i}`}>
                   <YesNo index={i + 1} label={q} value={parqPlusGeneral[i]} color="#A78BFA"
                     onChange={v => { const a = [...parqPlusGeneral]; a[i] = v; setParqPlusGeneral(a); }} />
                   {i === 3 && parqPlusGeneral[i] === true && (
@@ -735,16 +878,94 @@ export default function Survey() {
 
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => goNext(1)} style={{ flex: 1, background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>← 이전</button>
-              <button onClick={() => goNext(3)} disabled={!isParqPlusComplete}
-                style={{ flex: 2, background: isParqPlusComplete ? "#A78BFA" : "#2A2D3E", color: isParqPlusComplete ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: 16, cursor: isParqPlusComplete ? "pointer" : "not-allowed", fontFamily: font }}>
+              <button onClick={handleParqPlusNextSafe}
+                style={{ flex: 2, background: isParqPlusComplete ? "#A78BFA" : "#2A2D3E", color: isParqPlusComplete ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: 16, cursor: "pointer", fontFamily: font }}>
+                다음 → 개인정보 동의
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── STEP 3: 개인정보 동의 ── */}
+        {step === 3 && (
+          <div>
+            <div style={{ background: "#151821", border: "1px solid #4ECDC433", borderRadius: 16, padding: "20px", marginBottom: 20, textAlign: "center" }}>
+              <h2 style={{ fontSize: 18, fontWeight: 900, margin: "0 0 6px", color: "#4ECDC4" }}>개인정보 수집·이용 동의서</h2>
+              <p style={{ margin: 0, fontSize: 13, color: "#888", lineHeight: 1.8 }}>PT 서비스 제공을 위해 아래와 같이<br />개인정보를 수집·이용합니다.</p>
+            </div>
+
+            {/* 트레이너 정보 */}
+            <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+              {[["트레이너", trainerName || "담당 트레이너"], ["작성일", new Date().toLocaleDateString("ko-KR")]].map(([k, v]) => (
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: k !== "작성일" ? "1px solid #1E2133" : "none", fontSize: 13 }}>
+                  <span style={{ color: "#888" }}>{k}</span>
+                  <span style={{ fontWeight: 600 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* 수집 항목 */}
+            <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#4ECDC4", marginBottom: 12 }}>📋 수집하는 개인정보 항목 및 목적</div>
+              {[
+                ["이름, 연락처, 생년월일, 성별", "회원 식별 및 PT 서비스 제공", "서비스 종료 후 1년"],
+                ["건강 상태, 통증 부위, 운동 이력", "맞춤 운동 프로그램 설계", "서비스 종료 후 1년"],
+                ["인바디 측정 결과", "체성분 변화 추적 및 분석", "서비스 종료 후 1년"],
+                ["직업, 생활습관", "종합적 건강 관리", "서비스 종료 후 1년"],
+              ].map(([item, purpose, period], i) => (
+                <div key={i} style={{ padding: "8px 0", borderBottom: i < 3 ? "1px solid #1E2133" : "none" }}>
+                  <div style={{ fontSize: 12, color: "#E8E8E8", marginBottom: 3 }}>{item}</div>
+                  <div style={{ fontSize: 11, color: "#555" }}>목적: {purpose} · 보유: {period}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* 권리 안내 */}
+            <div style={{ background: "#FF6B6B12", border: "1px solid #FF6B6B33", borderRadius: 12, padding: "12px 14px", marginBottom: 20 }}>
+              <div style={{ fontSize: 12, color: "#FF6B6B", fontWeight: 700, marginBottom: 6 }}>⚠️ 민감정보 안내</div>
+              <div style={{ fontSize: 12, color: "#C0C0C0", lineHeight: 1.7 }}>건강 상태, 통증 부위 등 민감한 개인정보가 포함되며, PT 서비스 목적 외에는 사용되지 않습니다. 동의를 거부할 권리가 있으나 서비스 이용이 제한될 수 있습니다.</div>
+            </div>
+
+            {/* 필수 동의 1 */}
+            <div onClick={() => setAgree1(!agree1)} style={{ background: "#151821", border: "1px solid " + (agree1 ? "#4ECDC4" : "#1E2133"), borderRadius: 12, padding: "14px 16px", marginBottom: 10, cursor: "pointer", display: "flex", gap: 12, alignItems: "flex-start", transition: "all 0.2s" }}>
+              <div style={{ width: 22, height: 22, borderRadius: 6, border: "2px solid " + (agree1 ? "#4ECDC4" : "#2A2D3E"), background: agree1 ? "#4ECDC4" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                {agree1 && <span style={{ color: "#0F1117", fontWeight: 900, fontSize: 13 }}>✓</span>}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, display: "flex", gap: 6, alignItems: "center" }}>
+                  개인정보 수집·이용 동의
+                  <span style={{ fontSize: 10, padding: "2px 6px", background: "#FF6B6B22", color: "#FF6B6B", borderRadius: 4, fontWeight: 700 }}>필수</span>
+                </div>
+                <div style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>이름, 연락처, 생년월일, 성별, 건강정보를 PT 서비스 제공 목적으로 수집·이용하는 것에 동의합니다.</div>
+              </div>
+            </div>
+
+            {/* 필수 동의 2 */}
+            <div onClick={() => setAgree2(!agree2)} style={{ background: "#151821", border: "1px solid " + (agree2 ? "#4ECDC4" : "#1E2133"), borderRadius: 12, padding: "14px 16px", marginBottom: 24, cursor: "pointer", display: "flex", gap: 12, alignItems: "flex-start", transition: "all 0.2s" }}>
+              <div style={{ width: 22, height: 22, borderRadius: 6, border: "2px solid " + (agree2 ? "#4ECDC4" : "#2A2D3E"), background: agree2 ? "#4ECDC4" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                {agree2 && <span style={{ color: "#0F1117", fontWeight: 900, fontSize: 13 }}>✓</span>}
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, display: "flex", gap: 6, alignItems: "center" }}>
+                  민감정보 수집·이용 동의
+                  <span style={{ fontSize: 10, padding: "2px 6px", background: "#FF6B6B22", color: "#FF6B6B", borderRadius: 4, fontWeight: 700 }}>필수</span>
+                </div>
+                <div style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>건강 상태, 통증 부위, 인바디 측정 결과 등 민감정보를 수집·이용하는 것에 동의합니다.</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => goNext(parqHasYes ? 2 : 1)} style={{ flex: 1, background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>← 이전</button>
+              <button onClick={() => goNext(4)} disabled={!agree1 || !agree2}
+                style={{ flex: 2, background: agree1 && agree2 ? "#4ECDC4" : "#2A2D3E", color: agree1 && agree2 ? "#0F1117" : "#555", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: 16, cursor: agree1 && agree2 ? "pointer" : "not-allowed", fontFamily: font }}>
                 다음 → 서명
               </button>
             </div>
           </div>
         )}
 
-        {/* ── STEP 3: 서명 ── */}
-        {step === 3 && (
+        {/* ── STEP 4: 서명 ── */}
+        {step === 4 && (
           <div>
             <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "16px", marginBottom: 20 }}>
               <h2 style={{ fontSize: 16, fontWeight: 900, margin: "0 0 6px", color: "#F9CA24" }}>참여자 선언 및 서명</h2>
@@ -771,7 +992,7 @@ export default function Survey() {
                 </div>
                 <button onClick={() => setSignature(null)} style={{ width: "100%", background: "#2A2D3E", border: "none", borderRadius: 10, padding: "10px", color: "#888", fontSize: 14, cursor: "pointer", fontFamily: font, marginBottom: 12 }}>서명 다시하기</button>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <button onClick={() => goNext(parqHasYes ? 2 : 1)} style={{ flex: 1, background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>← 이전</button>
+                  <button onClick={() => goNext(3)} style={{ flex: 1, background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font }}>← 이전</button>
                   <button onClick={submit} disabled={submitting}
                     style={{ flex: 2, background: submitting ? "#2A2D3E" : "#4ECDC4", color: submitting ? "#555" : "#0F1117", border: "none", borderRadius: 12, padding: "14px", fontWeight: 800, fontSize: 16, cursor: submitting ? "not-allowed" : "pointer", fontFamily: font }}>
                     {submitting ? "제출 중..." : "제출하기 ✓"}
@@ -782,7 +1003,7 @@ export default function Survey() {
               <div>
                 <p style={{ fontSize: 13, color: "#888", marginBottom: 12 }}>아래 서명란에 서명해 주세요</p>
                 <SignaturePad onSave={setSignature} />
-                <button onClick={() => goNext(parqHasYes ? 2 : 1)} style={{ width: "100%", background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font, marginTop: 12 }}>← 이전</button>
+                <button onClick={() => goNext(3)} style={{ width: "100%", background: "#2A2D3E", border: "none", borderRadius: 12, padding: "14px", color: "#E8E8E8", fontWeight: 700, fontSize: 15, cursor: "pointer", fontFamily: font, marginTop: 12 }}>← 이전</button>
               </div>
             )}
           </div>

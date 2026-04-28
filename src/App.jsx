@@ -71,6 +71,10 @@ const ADMIN_PASSWORD = "12142659";
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = sessionStorage.getItem("mlUser");
+    if (saved) {
+      // 앱 열 때마다 loginTime 갱신
+      sessionStorage.setItem("mlLoginTime", new Date().toISOString());
+    }
     return saved ? JSON.parse(saved) : null;
   });
   const [users, setUsers] = useState([]);
@@ -84,6 +88,7 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [view, setView] = useState("list"); // list | detail | add | edit | settings | addTrainer | addFolder | editFolder
   const [folder, setFolder] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [noteDate, setNoteDate] = useState(today());
   const [search, setSearch] = useState("");
@@ -223,11 +228,21 @@ export default function App() {
   const getChangeBadge = (m) => {
     if (!loginTime) return null;
     const lt = new Date(loginTime);
-    if (m.createdAt?.toDate && m.createdAt.toDate() > lt) return { label: "NEW", color: "#FFE600", textColor: "#0F1117" };
-    const latestInbody = (m.inbody || []).sort((a, b) => b.date.localeCompare(a.date))[0];
+
+    // 신규 회원 — createdAt이 로그인 이후면 NEW
+    if (m.createdAt?.toDate && m.createdAt.toDate() > lt) {
+      return { label: "NEW", color: "#FFE600", textColor: "#0F1117" };
+    }
+
+    // 인바디 — updatedAt(ISO string)이 로그인 이후면 표시
+    const latestInbody = [...(m.inbody || [])].sort((a, b) => b.date.localeCompare(a.date))[0];
     if (latestInbody) {
-      const inbodyDate = new Date(latestInbody.date + "T00:00:00");
-      if (inbodyDate > lt) return { label: "인바디", color: "#00FFC8", textColor: "#0F1117" };
+      if (latestInbody.updatedAt) {
+        const inbodyUpdated = new Date(latestInbody.updatedAt);
+        if (!isNaN(inbodyUpdated) && inbodyUpdated > lt) {
+          return { label: "인바디", color: "#00FFC8", textColor: "#0F1117" };
+        }
+      }
     }
     return null;
   };
@@ -255,6 +270,7 @@ export default function App() {
       name: selected.name, age: selected.age || "",
       gender: selected.gender || "남성", purpose: selected.purpose || [],
       registeredDate: selected.registeredDate, folder: selected.folder,
+      timeSlot: selected.timeSlot || [],
     });
     setView("edit");
   };
@@ -266,6 +282,7 @@ export default function App() {
       name: editForm.name.trim(), age: editForm.age,
       gender: editForm.gender, purpose: editForm.purpose,
       registeredDate: editForm.registeredDate, folder: editForm.folder,
+      timeSlot: editForm.timeSlot || [],
     });
     setSaving(false); setView("detail");
   };
@@ -550,6 +567,19 @@ export default function App() {
           </div>
         )},
         { label: "등록 날짜", child: <input type="date" value={form.registeredDate} onChange={e => setForm({...form, registeredDate: e.target.value})} style={{...inputStyle, colorScheme: "dark"}} /> },
+        { label: "선호 수업 시간대", child: (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {["이른아침(06-09시)", "오전(09-12시)", "오후(12-17시)", "저녁(17-21시)", "주말"].map(t => {
+              const isSel = (form.timeSlot || []).includes(t);
+              return (
+                <button key={t} onClick={() => setForm({...form, timeSlot: isSel ? (form.timeSlot || []).filter(x => x !== t) : [...(form.timeSlot || []), t]})}
+                  style={{ padding: "8px 14px", border: "1px solid " + (isSel ? "#4D96FF" : "#2A2D3E"), borderRadius: 20, background: isSel ? "#4D96FF22" : "#0F1117", color: isSel ? "#4D96FF" : "#888", cursor: "pointer", fontSize: 13, fontFamily: "'Noto Sans KR', sans-serif", fontWeight: isSel ? 700 : 400 }}>
+                  {isSel ? "✓ " : ""}{t}
+                </button>
+              );
+            })}
+          </div>
+        )},
         ...(title === "신규 회원 등록" ? [{ label: "초기 건강 특이사항", child: (
           <textarea value={form.firstNote} onChange={e => setForm({...form, firstNote: e.target.value})}
             placeholder={"예) 허리디스크 병력, 무릎 통증 등\n없으면 비워두세요."}
@@ -579,7 +609,61 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "#0F1117", fontFamily: "'Noto Sans KR', sans-serif", color: "#E8E8E8" }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
 
-      <header style={{ borderBottom: "1px solid #1E2030", padding: "18px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#0F1117", position: "sticky", top: 0, zIndex: 100 }}>
+      {/* 사이드 메뉴 오버레이 */}
+      {menuOpen && (
+        <div onClick={() => setMenuOpen(false)}
+          style={{ position: "fixed", inset: 0, background: "#00000088", zIndex: 200 }} />
+      )}
+
+      {/* 사이드 메뉴 */}
+      <div style={{
+        position: "fixed", top: 0, right: 0, width: 240, height: "100%",
+        background: "#151821", borderLeft: "1px solid #2A2D3E",
+        zIndex: 201, display: "flex", flexDirection: "column",
+        transform: menuOpen ? "translateX(0)" : "translateX(100%)",
+        transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+      }}>
+        {/* 사이드 헤더 */}
+        <div style={{ padding: "18px 20px", borderBottom: "1px solid #1E2133", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 900, color: "#4ECDC4", letterSpacing: 4 }}>FORMA</span>
+          <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", color: "#555", fontSize: 18, cursor: "pointer" }}>✕</button>
+        </div>
+        {/* 유저 정보 */}
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid #1E2133", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 40, height: 40, background: "#4ECDC422", border: "1px solid #4ECDC444", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>
+            {currentUser?.emoji || "👤"}
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>{currentUser?.name}</div>
+            {isAdmin && <div style={{ fontSize: 11, color: "#F9CA24", marginTop: 2 }}>관리자</div>}
+          </div>
+        </div>
+        {/* 메뉴 항목 */}
+        <div style={{ flex: 1, padding: "8px 0" }}>
+          {[
+            { icon: "📝", label: "신규 회원 설문지", color: "#A78BFA", bg: "#A78BFA22", action: () => { navigator.clipboard.writeText(`${window.location.origin}/survey/new`); alert("설문지 링크가 복사됐어요! 😊"); setMenuOpen(false); } },
+            { icon: "💬", label: "카카오톡 문의", color: "#FEE500", bg: "#FEE50018", action: () => { window.open("https://open.kakao.com/o/szxBzqsi", "_blank"); setMenuOpen(false); } },
+            { icon: "📖", label: "사용설명서", color: "#4ECDC4", bg: "#4ECDC418", action: () => { window.open(`${window.location.origin}/guide/trainer`, "_blank"); setMenuOpen(false); } },
+            { icon: "⚙️", label: "설정", color: "#888", bg: "#88888818", action: () => { setView("settings"); setMenuOpen(false); } },
+          ].map(({ icon, label, color, bg, action }) => (
+            <button key={label} onClick={action}
+              style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 20px", width: "100%", background: "none", border: "none", cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>{icon}</div>
+              <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "#E8E8E8", textAlign: "left" }}>{label}</span>
+              <span style={{ color: "#444", fontSize: 16 }}>›</span>
+            </button>
+          ))}
+        </div>
+        {/* 로그아웃 */}
+        <div style={{ padding: "16px 20px", borderTop: "1px solid #1E2133" }}>
+          <button onClick={() => { handleLogout(); setMenuOpen(false); }}
+            style={{ width: "100%", padding: "12px", background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 12, color: "#888", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            👋 로그아웃
+          </button>
+        </div>
+      </div>
+
+      <header style={{ borderBottom: "1px solid #1E2030", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#0F1117", position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {view !== "list" && (
             <button onClick={() => {
@@ -588,49 +672,40 @@ export default function App() {
               else goList();
             }} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: 20, padding: "0 6px 0 0" }}>←</button>
           )}
-          <span onClick={() => view !== "list" && goList()} style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 900, color: "#4ECDC4", letterSpacing: 5, cursor: view !== "list" ? "pointer" : "default" }}>
+          <span onClick={() => view !== "list" && goList()} style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, color: "#4ECDC4", letterSpacing: 5, cursor: view !== "list" ? "pointer" : "default" }}>
             FORMA
           </span>
         </div>
-        {view === "list" && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button onClick={() => { setAddForm({ name: "", age: "", gender: "남성", purpose: [], registeredDate: today(), firstNote: "", folder: folder }); setView("add"); }}
-              style={{ background: "#4ECDC4", color: "#0F1117", border: "none", borderRadius: 8, padding: "8px 18px", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-              + 회원 추가
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {view === "detail" && selected && (
+            <button onClick={openEdit} style={{ background: "#2A2D3E", border: "none", borderRadius: 8, padding: "8px 16px", color: "#E8E8E8", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+              ✏️ 정보 수정
             </button>
-            <button onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/survey/new`);
-              alert("신규 회원용 설문지 링크가 복사됐어요!\n회원에게 공유해주세요 😊");
-            }} title="신규 회원 설문지 링크 복사"
-              style={{ background: "#1A1D27", border: "1px solid #A78BFA44", borderRadius: 8, padding: "6px 10px", color: "#A78BFA", fontSize: 16, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              📝
-              <span style={{ fontSize: 10, fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>설문지</span>
-            </button>
-            <button onClick={() => window.open("https://open.kakao.com/o/szxBzqsi", "_blank")} title="카카오톡 문의"
-              style={{ background: "#FEE50018", border: "1px solid #FEE50044", borderRadius: 8, padding: "6px 10px", color: "#FEE500", fontSize: 16, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              💬
-              <span style={{ fontSize: 10, fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>문의</span>
-            </button>
-            <button onClick={() => setView("settings")} title="설정"
-              style={{ background: "#1A1D27", border: "1px solid #2A2D3E", borderRadius: 8, padding: "6px 10px", color: "#888", fontSize: 16, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              ⚙️
-              <span style={{ fontSize: 10, fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>설정</span>
-            </button>
-            <button onClick={handleLogout} title="로그아웃"
-              style={{ background: "#1A1D27", border: "1px solid #2A2D3E", borderRadius: 8, padding: "6px 10px", color: "#888", fontSize: 16, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              👋
-              <span style={{ fontSize: 10, fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>로그아웃</span>
-            </button>
-          </div>
-        )}
-        {view === "detail" && selected && (
-          <button onClick={openEdit} style={{ background: "#2A2D3E", border: "none", borderRadius: 8, padding: "8px 16px", color: "#E8E8E8", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-            ✏️ 정보 수정
+          )}
+          {view === "settings" && <span style={{ fontSize: 14, color: "#888", fontWeight: 600 }}>설정</span>}
+          {view === "edit" && <span style={{ fontSize: 13, color: "#A78BFA", fontWeight: 600 }}>정보 수정 중</span>}
+          {/* 햄버거 버튼 */}
+          <button onClick={() => setMenuOpen(!menuOpen)}
+            style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 10, width: 42, height: 42, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, cursor: "pointer" }}>
+            {[0,1,2].map(i => (
+              <span key={i} style={{
+                display: "block", width: 18, height: 2, background: "#E8E8E8", borderRadius: 2,
+                transition: "all 0.3s",
+                transform: menuOpen ? (i === 0 ? "translateY(7px) rotate(45deg)" : i === 2 ? "translateY(-7px) rotate(-45deg)" : "scaleX(0)") : "none",
+                opacity: menuOpen && i === 1 ? 0 : 1,
+              }} />
+            ))}
           </button>
-        )}
-        {view === "settings" && <span style={{ fontSize: 14, color: "#888", fontWeight: 600 }}>설정</span>}
-        {view === "edit" && <span style={{ fontSize: 13, color: "#A78BFA", fontWeight: 600 }}>정보 수정 중</span>}
+        </div>
       </header>
+
+      {/* 플로팅 + 버튼 (list 화면에서만) */}
+      {view === "list" && (
+        <button onClick={() => { setAddForm({ name: "", age: "", gender: "남성", purpose: [], registeredDate: today(), firstNote: "", folder: folder, timeSlot: [] }); setView("add"); }}
+          style={{ position: "fixed", bottom: 28, right: 24, width: 56, height: 56, background: "#4ECDC4", border: "none", borderRadius: "50%", color: "#0F1117", fontSize: 28, fontWeight: 900, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 24px #4ECDC455", zIndex: 50, transition: "transform 0.15s" }}>
+          ＋
+        </button>
+      )}
 
       <main style={{ maxWidth: 560, margin: "0 auto", padding: "0 0 80px 0" }}>
 
@@ -917,6 +992,9 @@ export default function App() {
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
                       <span style={{ fontWeight: 700, fontSize: 16 }}>{m.name}</span>
                       <span style={{ fontSize: 13, color: "#999" }}>{m.age} · {m.gender}</span>
+                      {m.timeSlot && m.timeSlot.length > 0 && (
+                        <span style={{ fontSize: 12, color: "#4D96FF" }}>🕐 {m.timeSlot.join(" · ")}</span>
+                      )}
                       {badge && (
                         <span style={{ fontSize: 10, fontWeight: 900, padding: "3px 8px", borderRadius: 6, background: badge.color, color: badge.textColor }}>
                           {badge.label}

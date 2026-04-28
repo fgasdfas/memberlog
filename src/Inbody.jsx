@@ -67,6 +67,10 @@ export default function Inbody() {
   });
 
   useEffect(() => {
+    // 회원 ID를 localStorage에 저장 (위젯용)
+    if (memberId && memberId !== "new") {
+      localStorage.setItem("inbodyMemberId", memberId);
+    }
     getDoc(doc(db, "members", memberId)).then(snap => {
       if (snap.exists()) setMember({ id: snap.id, ...snap.data() });
       setLoading(false);
@@ -396,31 +400,34 @@ export default function Inbody() {
                 </div>
 
                 {/* 컨디션 그래프 */}
-                {chartData.some(d => d.컨디션 !== null) && (
+                {chartData.some(d => d.컨디션) && (
                   <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: "16px", marginBottom: 14 }}>
                     <p style={{ fontSize: 12, color: "#F9CA24", fontWeight: 700, marginBottom: 14 }}>🌟 컨디션 변화</p>
                     <ResponsiveContainer width="100%" height={140}>
                       <LineChart data={chartData}>
                         <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#555" }} />
                         <YAxis tick={{ fontSize: 10, fill: "#555" }} domain={[0, 6]} ticks={[1,2,3,4,5]}
-                          tickFormatter={v => conditionLabel[v] || ""} />
+                          tickFormatter={v => ["","😴","😐","🙂","😊","💪"][v] || ""} />
                         <Tooltip content={({ active, payload }) => {
                           if (!active || !payload?.length) return null;
                           const d = payload[0].payload;
+                          if (!d.컨디션이모지) return null;
                           return (
                             <div style={{ background: "#1A1D27", border: "1px solid #2A2D3E", borderRadius: 8, padding: "8px 12px", fontSize: 12 }}>
                               <div style={{ color: "#888", marginBottom: 4 }}>{d.date}</div>
-                              <div style={{ fontSize: 20 }}>{d.컨디션이모지 || "-"}</div>
+                              <div style={{ fontSize: 22 }}>{d.컨디션이모지}</div>
                             </div>
                           );
                         }} />
-                        <Line type="monotone" dataKey="컨디션" stroke="#F9CA24" strokeWidth={2} dot={({ cx, cy, payload }) => (
-                          <text key={payload.date} x={cx} y={cy + 5} textAnchor="middle" fontSize={16}>{payload.컨디션이모지 || ""}</text>
-                        )} name="컨디션" />
+                        <Line type="monotone" dataKey="컨디션" stroke="#F9CA24" strokeWidth={2}
+                          dot={{ r: 5, fill: "#F9CA24", stroke: "#F9CA24" }}
+                          activeDot={{ r: 7 }}
+                          connectNulls={false}
+                          name="컨디션" />
                       </LineChart>
                     </ResponsiveContainer>
-                    <div style={{ display: "flex", justifyContent: "space-between", padding: "0 8px", fontSize: 10, color: "#444" }}>
-                      <span>😴 최악</span><span>😐</span><span>🙂</span><span>😊</span><span>💪 최고</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "0 8px", fontSize: 11, color: "#555" }}>
+                      <span>😴</span><span>😐</span><span>🙂</span><span>😊</span><span>💪</span>
                     </div>
                   </div>
                 )}

@@ -72,7 +72,10 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = sessionStorage.getItem("mlUser");
     if (saved) {
-      // 앱 열 때마다 loginTime 갱신
+      // 이전 loginTime을 prevLoginTime에 저장해두고
+      const prev = sessionStorage.getItem("mlLoginTime");
+      if (prev) sessionStorage.setItem("mlPrevLoginTime", prev);
+      // loginTime을 현재 시간으로 갱신
       sessionStorage.setItem("mlLoginTime", new Date().toISOString());
     }
     return saved ? JSON.parse(saved) : null;
@@ -86,9 +89,10 @@ export default function App() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-  const [view, setView] = useState("list"); // list | detail | add | edit | settings | addTrainer | addFolder | editFolder
+  const [view, setView] = useState("list");
   const [folder, setFolder] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [seenMembers, setSeenMembers] = useState(new Set());
   const [newNote, setNewNote] = useState("");
   const [noteDate, setNoteDate] = useState(today());
   const [search, setSearch] = useState("");
@@ -195,6 +199,9 @@ export default function App() {
     const user = users.find(u => u.id === selectedUserId);
     if (user && pwInput === user.password) {
       sessionStorage.setItem("mlUser", JSON.stringify(user));
+      // 로그인 시 이전 loginTime 저장 후 갱신
+      const prev = sessionStorage.getItem("mlLoginTime");
+      if (prev) sessionStorage.setItem("mlPrevLoginTime", prev);
       sessionStorage.setItem("mlLoginTime", new Date().toISOString());
       setCurrentUser(user);
       if (user.folders?.length > 0) {
@@ -223,25 +230,24 @@ export default function App() {
 
   const folderCount = (key) => members.filter(m => m.folder === key && (isAdmin || !m.owner || m.owner === currentUser?.id)).length;
 
-  // 변동사항 감지
-  const loginTime = sessionStorage.getItem("mlLoginTime");
+  // 변동사항 감지 — 이전 접속 시간 기준
+  const loginTime = sessionStorage.getItem("mlPrevLoginTime") || sessionStorage.getItem("mlLoginTime");
   const getChangeBadge = (m) => {
     if (!loginTime) return null;
+    if (seenMembers.has(m.id)) return null; // 이미 확인한 회원
     const lt = new Date(loginTime);
 
-    // 신규 회원 — createdAt이 로그인 이후면 NEW
+    // 신규 회원 — createdAt이 이전 접속 이후면 NEW
     if (m.createdAt?.toDate && m.createdAt.toDate() > lt) {
       return { label: "NEW", color: "#FFE600", textColor: "#0F1117" };
     }
 
-    // 인바디 — updatedAt(ISO string)이 로그인 이후면 표시
+    // 인바디 — updatedAt이 이전 접속 이후면 표시
     const latestInbody = [...(m.inbody || [])].sort((a, b) => b.date.localeCompare(a.date))[0];
-    if (latestInbody) {
-      if (latestInbody.updatedAt) {
-        const inbodyUpdated = new Date(latestInbody.updatedAt);
-        if (!isNaN(inbodyUpdated) && inbodyUpdated > lt) {
-          return { label: "인바디", color: "#00FFC8", textColor: "#0F1117" };
-        }
+    if (latestInbody?.updatedAt) {
+      const inbodyUpdated = new Date(latestInbody.updatedAt);
+      if (!isNaN(inbodyUpdated) && inbodyUpdated > lt) {
+        return { label: "인바디", color: "#00FFC8", textColor: "#0F1117" };
       }
     }
     return null;
@@ -254,10 +260,13 @@ export default function App() {
 
   const openDetail = (m) => {
     setSelected(m); setView("detail");
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setNewNote(""); setNoteDate(today());
     setShowMoveConfirm(false); setMoveTarget("");
     setShowInbodyAdd(false); setInbodyForm(emptyInbody());
     setActiveTab("record"); setSurvey(null); setShowSurveyDetail(false);
+    // 뱃지 확인 처리
+    setSeenMembers(prev => new Set([...prev, m.id]));
     // 설문지 불러오기
     getDoc(doc(db, "surveys", m.id)).then(snap => {
       if (snap.exists()) setSurvey(snap.data());
@@ -598,9 +607,12 @@ export default function App() {
     </div>
   );
 
-  const inbodyData = (selected?.inbody || []).map(e => ({
+  const conditionMap = { "😴": 1, "😐": 2, "🙂": 3, "😊": 4, "💪": 5 };
+  const inbodyData = [...(selected?.inbody || [])].sort((a, b) => a.date.localeCompare(b.date)).map(e => ({
     date: formatDate(e.date).slice(5),
     체중: e.weight, 골격근량: e.muscle, 체지방률: e.fat, 체지방량: e.fatmass,
+    컨디션: e.condition ? conditionMap[e.condition] : null,
+    컨디션이모지: e.condition || null,
   }));
 
   const currentFolder = currentFolders.find(f => f.key === folder);
@@ -1358,6 +1370,27 @@ export default function App() {
                           <span style={{ fontSize: 11, color: "#888" }}>{key}({unit})</span>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 컨디션 그래프 */}
+                {inbodyData.some(d => d.컨디션) && (
+                  <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "16px", marginBottom: 20 }}>
+                    <p style={{ margin: "0 0 12px", fontSize: 13, color: "#F9CA24" }}>🌟 컨디션 변화</p>
+                    <ResponsiveContainer width="100%" height={140}>
+                      <LineChart data={inbodyData}>
+                        <XAxis dataKey="date" stroke="#555" tick={{ fontSize: 10, fill: "#666" }} />
+                        <YAxis stroke="#555" tick={{ fontSize: 10, fill: "#666" }} width={30} domain={[0, 6]} ticks={[1,2,3,4,5]}
+                          tickFormatter={v => ["","😴","😐","🙂","😊","💪"][v] || ""} />
+                        <Tooltip contentStyle={{ background: "#1A1D27", border: "1px solid #2A2D3E", borderRadius: 8, color: "#E8E8E8", fontSize: 11 }}
+                          formatter={(value, name, props) => [props.payload.컨디션이모지 || value, "컨디션"]} />
+                        <Line type="monotone" dataKey="컨디션" stroke="#F9CA24" strokeWidth={2}
+                          dot={{ fill: "#F9CA24", r: 5 }} activeDot={{ r: 7 }} connectNulls={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "0 4px", fontSize: 11, color: "#555" }}>
+                      <span>😴 최악</span><span>😐</span><span>🙂</span><span>😊</span><span>💪 최고</span>
                     </div>
                   </div>
                 )}

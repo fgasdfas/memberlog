@@ -1049,7 +1049,7 @@ export default function App() {
           <div style={{ padding: "16px 20px" }}>
             <div style={{ marginBottom: 12 }}>
               <span style={{ fontSize: 12, color: currentFolders.find(f=>f.key===selected.folder)?.color || "#4ECDC4", background: (currentFolders.find(f=>f.key===selected.folder)?.color || "#4ECDC4") + "22", padding: "4px 12px", borderRadius: 20, fontWeight: 600 }}>
-                {currentFolders.find(f => f.key === selected.folder)?.emoji} {selected.folder}
+                {currentFolders.find(f => f.key === selected.folder)?.emoji} {currentFolders.find(f => f.key === selected.folder)?.label || selected.folder}
               </span>
             </div>
             <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "20px", marginBottom: 20 }}>

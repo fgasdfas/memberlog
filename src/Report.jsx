@@ -85,13 +85,17 @@ export default function Report() {
         if (!snap.exists()) { setLoading(false); return; }
         const m = { id: snap.id, ...snap.data() };
         setMember(m);
-        setFolderName(m.folder || "");
 
-        // 트레이너 이름 찾기
+        // 트레이너 정보 + 폴더 라벨
         if (m.owner) {
           try {
             const userSnap = await getDoc(doc(db, "users", m.owner));
-            if (userSnap.exists()) setTrainerName(userSnap.data().name || "박광덕");
+            if (userSnap.exists()) {
+              const u = userSnap.data();
+              setTrainerName(u.name || "박광덕");
+              const f = (u.folders || []).find(x => x.key === m.folder);
+              setFolderName(f?.label || "");
+            }
           } catch (e) {}
         }
 

@@ -91,6 +91,7 @@ export default function App() {
   const [pwError, setPwError] = useState(false);
 
   const [members, setMembers] = useState([]);
+  const [submittedSurveys, setSubmittedSurveys] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [view, setView] = useState("list");
@@ -186,7 +187,11 @@ export default function App() {
         return updated || prev;
       });
     });
-    return () => unsub();
+    // surveys 컬렉션 구독 - 어떤 회원이 설문 냈는지 ID 셋
+    const unsubSurveys = onSnapshot(collection(db, "surveys"), (snap) => {
+      setSubmittedSurveys(new Set(snap.docs.map(d => d.id)));
+    });
+    return () => { unsub(); unsubSurveys(); };
   }, [currentUser]);
 
   // currentUser 정보 실시간 업데이트
@@ -1150,7 +1155,7 @@ export default function App() {
                 }
                 return (
                 <div key={m.id} onClick={() => openDetail(m)}
-                  style={{ position: "relative", background: badge ? badge.color + "08" : (!m.surveyUpdatedAt ? "#FF6B6B05" : "#151821"), border: badge ? "2.5px solid " + badge.color : (!m.surveyUpdatedAt ? "1px solid #FF6B6B55" : "1px solid #1E2133"), borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
+                  style={{ position: "relative", background: badge ? badge.color + "08" : (!submittedSurveys.has(m.id) ? "#FF6B6B05" : "#151821"), border: badge ? "2.5px solid " + badge.color : (!submittedSurveys.has(m.id) ? "1px solid #FF6B6B55" : "1px solid #1E2133"), borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
                   {/* Row 1: 이름 + 연령 | 성별 + 뱃지 */}
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6, flexWrap: "wrap", paddingRight: 16 }}>
                     <span style={{ fontWeight: 800, fontSize: 18, color: "#E8E8E8" }}>{m.name}</span>
@@ -1164,7 +1169,7 @@ export default function App() {
                         {badge.label}
                       </span>
                     )}
-                    {!m.surveyUpdatedAt && !badge && (
+                    {!submittedSurveys.has(m.id) && !badge && (
                       <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#FF6B6B22", color: "#FF6B6B", border: "1px solid #FF6B6B66", display: "inline-flex", alignItems: "center", gap: 4 }}>
                         <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#FF6B6B" }}></span>
                         설문 미제출

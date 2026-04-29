@@ -455,9 +455,31 @@ export default function Survey() {
 
       // 신규 회원이면 members 컬렉션에 자동 생성
       if (isNewMember) {
+        // URL 파라미터에서 트레이너 ID와 폴더 키 받기
+        const trainerId = searchParams.get("t");
+        const folderKey = searchParams.get("f");
+        let folderToUse = folderKey || "";
+
+        // 트레이너 정보 조회 (폴더 검증 + 기본 폴더 fallback)
+        if (trainerId) {
+          try {
+            const userSnap = await getDoc(doc(db, "users", trainerId));
+            if (userSnap.exists()) {
+              const u = userSnap.data();
+              const folders = u.folders || [];
+              // 지정된 폴더가 그 트레이너 소유인지 확인
+              if (!folderKey || !folders.find(x => x.key === folderKey)) {
+                folderToUse = folders[0]?.key || "회원님들";
+              }
+            }
+          } catch (e) { /* 무시 */ }
+        }
+        if (!folderToUse) folderToUse = "회원님들";
+
         const newMemberRef = await addDoc(collection(db, "members"), {
           ...memberData,
-          folder: "롯데대연",
+          folder: folderToUse,
+          owner: trainerId || null,
         });
         targetMemberId = newMemberRef.id;
       } else {

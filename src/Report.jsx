@@ -42,30 +42,77 @@ const delta = (first, last) => {
 };
 
 const generateComment = (member, inbody, period) => {
-  if (!inbody || inbody.length < 2) {
-    return `${member.name || "회원"}님과 함께한 시간 동안 꾸준히 운동에 임해주셨습니다. 앞으로의 변화도 기대됩니다. 다음 사이클에서는 측정 빈도를 늘려 더 정밀한 변화 추적을 함께 해보시면 좋겠습니다.`;
-  }
-  const first = inbody[0];
-  const last = inbody[inbody.length - 1];
-  const dWeight = delta(num(first.weight), num(last.weight));
-  const dMuscle = delta(num(first.muscle), num(last.muscle));
-  const dFat = delta(num(first.fat), num(last.fat));
+  const name = member.name || "회원";
+  const purposes = member.purpose || [];
+  const notes = member.notes || [];
 
+  // 건강기록에서 자주 등장한 키워드 뽑기
+  const allText = notes.map(n => n.text || "").join(" ");
+  const keywords = [];
+  // 신체 관리
+  if (/통증|아픔|불편|뻐근/.test(allText)) keywords.push("통증 케어");
+  if (/자세|폼|교정|정렬/.test(allText)) keywords.push("자세 교정");
+  if (/스트레칭|가동범위|유연성|모빌리티/.test(allText)) keywords.push("유연성 개선");
+  if (/재활|회복|치료|보호/.test(allText)) keywords.push("재활 운동");
+  // 운동 강도
+  if (/중량|kg|무게|증량|RM/.test(allText)) keywords.push("중량 향상");
+  if (/세트|반복|볼륨|훈련량/.test(allText)) keywords.push("훈련량 증가");
+  if (/유산소|러닝|걷기|사이클|인터벌/.test(allText)) keywords.push("유산소 병행");
+  // 부위별
+  if (/코어|복근|복부|플랭크/.test(allText)) keywords.push("코어 강화");
+  if (/하체|스쿼트|런지|데드/.test(allText)) keywords.push("하체 강화");
+  if (/상체|가슴|등|어깨|벤치|풀업/.test(allText)) keywords.push("상체 발달");
+  if (/엉덩이|힙|둔근|글루트/.test(allText)) keywords.push("힙업");
+  // 생활 습관
+  if (/식단|단백질|영양|칼로리/.test(allText)) keywords.push("식단 관리");
+  if (/수면|컨디션|회복|휴식/.test(allText)) keywords.push("컨디션 관리");
+  if (/체력|지구력|심폐/.test(allText)) keywords.push("체력 향상");
+  // 자세/멘탈
+  if (/꾸준|성실|적극|열심/.test(allText)) keywords.push("성실한 참여");
+  if (/목표|계획|루틴/.test(allText)) keywords.push("목표 지향적 진행");
+
+  // 인바디 변화 분석
+  let bodyChange = "";
+  if (inbody && inbody.length >= 2) {
+    const first = inbody[0];
+    const last = inbody[inbody.length - 1];
+    const dWeight = delta(num(first.weight), num(last.weight));
+    const dMuscle = delta(num(first.muscle), num(last.muscle));
+    const dFat = delta(num(first.fat), num(last.fat));
+
+    const highlights = [];
+    if (dFat !== null && dFat < -2) highlights.push(`체지방률을 ${Math.abs(dFat)}%p 감량`);
+    if (dMuscle !== null && dMuscle > 0.5) highlights.push(`골격근량을 ${Math.abs(dMuscle)}kg 증가`);
+    if (dWeight !== null && dWeight < -2) highlights.push(`체중 ${Math.abs(dWeight)}kg 감량`);
+    if (dWeight !== null && dWeight > 1 && dMuscle !== null && dMuscle > 0.5) highlights.push(`근육 위주의 건강한 증량`);
+
+    if (highlights.length > 0) bodyChange = highlights.join("과 ") + "을 이뤄내셨습니다.";
+  }
+
+  // 문장 조립
   const parts = [];
-  if (period) parts.push(`${period}주간`);
-  parts.push(`${member.name || "회원"}님과 함께한 변화를 정리해드립니다.`);
 
-  const highlights = [];
-  if (dFat !== null && dFat < -2) highlights.push(`체지방률을 ${Math.abs(dFat)}%p 감량`);
-  if (dMuscle !== null && dMuscle > 0.5) highlights.push(`골격근량을 ${Math.abs(dMuscle)}kg 증가`);
-  if (dWeight !== null && dWeight < -2) highlights.push(`체중 ${Math.abs(dWeight)}kg 감량`);
-  if (dWeight !== null && dWeight > 1 && dMuscle !== null && dMuscle > 0.5) highlights.push(`근육 위주의 건강한 증량`);
+  // 인사 + 기간 + 목적
+  let opener = `${period ? period + "주간 " : ""}${name}님과`;
+  if (purposes.length > 0) opener += ` "${purposes.join(", ")}"을(를) 목표로`;
+  opener += " 함께해 왔습니다.";
+  parts.push(opener);
 
-  if (highlights.length > 0) {
-    parts.push(highlights.join("과 ") + "을 이뤄내셨습니다.");
+  // 인바디 변화
+  if (bodyChange) parts.push(bodyChange);
+
+  // 세션에서 다룬 포인트
+  if (keywords.length > 0) {
+    parts.push(`그 과정에서 ${keywords.slice(0, 3).join(", ")} 등을 중점적으로 진행했습니다.`);
   }
 
-  parts.push("일관된 자기관리와 적극적인 자세가 결과로 이어졌습니다. 다음 사이클에서도 함께 더 나은 변화를 만들어가요.");
+  // 마무리
+  if (inbody && inbody.length >= 2 && bodyChange) {
+    parts.push("꾸준한 자기관리와 적극적인 자세가 결과로 이어졌습니다. 다음 사이클에서도 함께 더 나은 변화를 만들어가요.");
+  } else {
+    parts.push("앞으로의 변화도 기대됩니다. 측정 빈도를 늘려 더 정밀하게 함께 추적해보겠습니다.");
+  }
+
   return parts.join(" ");
 };
 
@@ -174,10 +221,31 @@ export default function Report() {
       </div>
 
       <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
         @media print {
-          body { background: white !important; }
+          html, body {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 210mm;
+            height: 297mm;
+          }
           .no-print { display: none !important; }
-          #report-a4 { box-shadow: none !important; }
+          #report-a4 {
+            box-shadow: none !important;
+            margin: 0 !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            max-height: 297mm !important;
+            padding: 12mm 14mm 10mm !important;
+            overflow: hidden !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+          }
         }
       `}</style>
 

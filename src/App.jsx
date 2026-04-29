@@ -38,17 +38,28 @@ const PAR_Q_PLUS_SHORT = [
   "의학적 감독하 운동 권고",
 ];
 const FOLDER_COLORS = ["#4ECDC4", "#FF6B6B", "#A78BFA", "#FFA500", "#6BCB77", "#F9CA24", "#FF85A1", "#4D96FF"];
-const FOLDER_EMOJIS = ["🏋️", "💪", "💻", "🗂️", "🔥", "⭐", "🌟", "🎯"];
+const FOLDER_EMOJIS = ["🏋️", "💪", "🤸", "🧘", "🏃", "🚴", "🏊", "🏢", "🏠", "📍", "📁", "🗂️", "💻", "📋", "⭐", "🌟", "✨", "🔥", "💎", "🎯", "🏆", "🌿", "🌸", "🌊", "🌙", "☀️", "🍀", "🌈"];
 const PURPOSES = ["다이어트", "근력강화", "체형교정", "재활", "건강유지", "스트레스해소", "기타"];
 const AGE_GROUPS = ["10대", "20대", "30대", "40대", "50대", "60대", "70대"];
 const GENDERS = ["남성", "여성"];
-const USER_EMOJIS = ["🦆", "🐯", "🦁", "🐻", "🦊", "🐺", "🦝", "🐸"];
+const USER_EMOJIS = ["🦁", "🐯", "🐺", "🦊", "🐻", "🐼", "🦝", "🐶", "🐱", "🐰", "🐹", "🐭", "🐸", "🦆", "🦅", "🦉", "🐧", "🐬", "🐳", "🦈", "🐠", "🦄", "🐉", "🦖", "🐊", "🦓", "🦘", "🐢"];
 
 const formatDate = (date) => {
   const d = new Date(date);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 };
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+
+const shortTimeSlot = (t) => {
+  if (!t) return "";
+  if (t.includes("이른아침")) return "이른아침";
+  if (t.includes("오전")) return "오전";
+  if (t.includes("오후")) return "오후";
+  if (t.includes("저녁")) return "저녁";
+  return t;
+};
+const shortAge = (a) => (a ? String(a).replace("대", "") : "");
+const shortGender = (g) => (g === "남성" ? "남" : g === "여성" ? "여" : g || "");
 
 const purposeColor = {
   "다이어트": "#FF6B6B", "근력강화": "#4ECDC4", "체형교정": "#A78BFA",
@@ -91,6 +102,13 @@ export default function App() {
   });
   const [newNote, setNewNote] = useState("");
   const [noteDate, setNoteDate] = useState(today());
+  const [editNotesMode, setEditNotesMode] = useState(false);
+  const [editingNoteIdx, setEditingNoteIdx] = useState(null);
+  const [editingNoteText, setEditingNoteText] = useState("");
+  const [editingNoteDate, setEditingNoteDate] = useState("");
+  const [moveOwnerOpen, setMoveOwnerOpen] = useState(false);
+  const [moveOwnerTrainer, setMoveOwnerTrainer] = useState("");
+  const [moveOwnerFolder, setMoveOwnerFolder] = useState("");
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [addForm, setAddForm] = useState(null);
@@ -175,6 +193,13 @@ export default function App() {
     if (!currentUser) return;
     const updated = users.find(u => u.id === currentUser.id);
     if (updated) {
+      // 폴더 없는 트레이너 자동 미분류 생성 (관리자 제외)
+      if (!updated.isAdmin && (!updated.folders || updated.folders.length === 0)) {
+        updateDoc(doc(db, "users", updated.id), {
+          folders: [{ key: "회원님들", label: "회원님들", emoji: "📁" }],
+        }).catch(e => console.error(e));
+        return;
+      }
       const newUser = { ...updated };
       setCurrentUser(newUser);
       sessionStorage.setItem("mlUser", JSON.stringify(newUser));
@@ -308,6 +333,79 @@ export default function App() {
     const updatedNotes = [...(selected.notes || []), { date: noteDate, text: newNote.trim() }];
     await updateDoc(doc(db, "members", selected.id), { notes: updatedNotes });
     setNewNote(""); setNoteDate(today()); setSaving(false);
+  };
+
+  const startEditNote = (idx) => {
+    const n = selected.notes[idx];
+    setEditingNoteIdx(idx);
+    setEditingNoteText(n.text || "");
+    setEditingNoteDate(n.date || today());
+  };
+
+  const cancelEditNote = () => {
+    setEditingNoteIdx(null);
+    setEditingNoteText("");
+    setEditingNoteDate("");
+  };
+
+  const saveEditNote = async () => {
+    if (!editingNoteText.trim() || editingNoteIdx === null) return;
+    setSaving(true);
+    const updatedNotes = (selected.notes || []).map((n, i) =>
+      i === editingNoteIdx ? { ...n, date: editingNoteDate, text: editingNoteText.trim() } : n
+    );
+    await updateDoc(doc(db, "members", selected.id), { notes: updatedNotes });
+    cancelEditNote();
+    setSaving(false);
+  };
+
+  const deleteNote = async (idx) => {
+    if (!confirm("이 기록을 삭제할까요?")) return;
+    setSaving(true);
+    const updatedNotes = (selected.notes || []).filter((_, i) => i !== idx);
+    await updateDoc(doc(db, "members", selected.id), { notes: updatedNotes });
+    cancelEditNote();
+    setSaving(false);
+  };
+
+  const openMoveOwner = () => {
+    setMoveOwnerTrainer(selected.owner || "");
+    setMoveOwnerFolder(selected.folder || "");
+    setMoveOwnerOpen(true);
+  };
+
+  const moveToTrainer = async () => {
+    if (!moveOwnerTrainer) {
+      alert("트레이너를 선택해주세요");
+      return;
+    }
+    const targetUser = users.find(u => u.id === moveOwnerTrainer);
+    const targetFolders = targetUser?.folders || [];
+    let finalFolder = moveOwnerFolder;
+
+    // 폴더 없는 트레이너면 '회원님들' 자동 생성
+    if (targetFolders.length === 0) {
+      finalFolder = "회원님들";
+      try {
+        await updateDoc(doc(db, "users", moveOwnerTrainer), {
+          folders: [{ key: "회원님들", label: "회원님들", emoji: "📁" }],
+        });
+      } catch (e) { console.error(e); }
+    } else if (!finalFolder) {
+      alert("폴더를 선택해주세요");
+      return;
+    }
+
+    if (!confirm(`이 회원을 ${targetUser?.name || ""} 트레이너의 ${finalFolder} 폴더로 이동할까요?`)) return;
+    setSaving(true);
+    await updateDoc(doc(db, "members", selected.id), {
+      owner: moveOwnerTrainer,
+      folder: finalFolder,
+    });
+    setMoveOwnerOpen(false);
+    setSaving(false);
+    alert("이동 완료");
+    setView("list");
   };
 
   const addInbody = async () => {
@@ -450,7 +548,7 @@ export default function App() {
       password: newTrainerPassword.trim(),
       emoji: newTrainerEmoji,
       isAdmin: false,
-      folders: [],
+      folders: [{ key: "회원님들", label: "회원님들", emoji: "📁" }],
       createdAt: serverTimestamp(),
     });
     setNewTrainerName(""); setNewTrainerPassword(""); setNewTrainerEmoji(USER_EMOJIS[1]);
@@ -668,7 +766,13 @@ export default function App() {
         {/* 메뉴 항목 */}
         <div style={{ flex: 1, padding: "8px 0" }}>
           {[
-            { icon: "📝", label: "신규 회원 설문지", color: "#A78BFA", bg: "#A78BFA22", action: () => { navigator.clipboard.writeText(`${window.location.origin}/#/survey/new`); alert("설문지 링크가 복사됐어요! 😊"); setMenuOpen(false); } },
+            { icon: "📝", label: "신규 회원 설문지", color: "#A78BFA", bg: "#A78BFA22", action: () => {
+              const params = new URLSearchParams();
+              if (currentUser?.id) params.set("t", currentUser.id);
+              if (folder) params.set("f", folder);
+              const url = `${window.location.origin}/#/survey/new${params.toString() ? "?" + params.toString() : ""}`;
+              navigator.clipboard.writeText(url); alert("설문지 링크가 복사됐어요! 😊"); setMenuOpen(false);
+            } },
             { icon: "💬", label: "카카오톡 문의", color: "#FEE500", bg: "#FEE50018", action: () => { window.open("https://open.kakao.com/o/szxBzqsi", "_blank"); setMenuOpen(false); } },
             { icon: "📖", label: "사용설명서", color: "#4ECDC4", bg: "#4ECDC418", action: () => { window.open(`${window.location.origin}/#/guide/trainer`, "_blank"); setMenuOpen(false); } },
             { icon: "⚙️", label: "설정", color: "#888", bg: "#88888818", action: () => { setView("settings"); setMenuOpen(false); } },
@@ -756,16 +860,26 @@ export default function App() {
                 회원 등록 전에 설문지를 먼저 받고 싶을 때 사용하세요.<br/>
                 회원이 제출하면 자동으로 회원 등록이 돼요.
               </p>
-              <div style={{ background: "#0F1117", borderRadius: 8, padding: "8px 12px", marginBottom: 10, wordBreak: "break-all", fontSize: 12, color: "#A78BFA" }}>
-                {`${window.location.origin}/#/survey/new`}
-              </div>
-              <button onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/#/survey/new`);
-                alert("신규 회원용 설문지 링크가 복사됐어요!");
-              }}
-                style={{ width: "100%", background: "#A78BFA", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-                🔗 링크 복사
-              </button>
+              {(() => {
+                const params = new URLSearchParams();
+                if (currentUser?.id) params.set("t", currentUser.id);
+                if (folder) params.set("f", folder);
+                const surveyUrl = `${window.location.origin}/#/survey/new${params.toString() ? "?" + params.toString() : ""}`;
+                return (
+                  <>
+                    <div style={{ background: "#0F1117", borderRadius: 8, padding: "8px 12px", marginBottom: 10, wordBreak: "break-all", fontSize: 12, color: "#A78BFA" }}>
+                      {surveyUrl}
+                    </div>
+                    <button onClick={() => {
+                      navigator.clipboard.writeText(surveyUrl);
+                      alert("신규 회원용 설문지 링크가 복사됐어요!");
+                    }}
+                      style={{ width: "100%", background: "#A78BFA", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      🔗 링크 복사
+                    </button>
+                  </>
+                );
+              })()}
             </div>
 
             {/* 사용설명서 */}
@@ -1010,54 +1124,78 @@ export default function App() {
               {filtered.length === 0 && <p style={{ textAlign: "center", color: "#555", marginTop: 60 }}>등록된 회원이 없습니다</p>}
               {filtered.map(m => {
                 const badge = getChangeBadge(m);
+                const purposes = m.purpose || [];
+                const showPurposes = purposes.slice(0, 3);
+                const morePurposes = purposes.length - showPurposes.length;
+                const sortedInbody = [...(m.inbody || [])].sort((a, b) => a.date.localeCompare(b.date));
+                let weightChange = null, fatChange = null;
+                if (sortedInbody.length >= 2) {
+                  const first = sortedInbody[0], last = sortedInbody[sortedInbody.length - 1];
+                  if (first.weight !== null && last.weight !== null) weightChange = Math.round((last.weight - first.weight) * 10) / 10;
+                  if (first.fat !== null && last.fat !== null) fatChange = Math.round((last.fat - first.fat) * 10) / 10;
+                }
                 return (
                 <div key={m.id} onClick={() => openDetail(m)}
-                  style={{ background: badge ? badge.color + "08" : "#151821", border: badge ? "2.5px solid " + badge.color : "1px solid #1E2133", borderRadius: 14, padding: "16px 18px", marginBottom: 12, cursor: "pointer", transition: "border-color 0.2s", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = badge ? badge.color : (currentFolder?.color || "#4ECDC4")}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = badge ? badge.color : "#1E2133"}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                      <span style={{ fontWeight: 700, fontSize: 16 }}>{m.name}</span>
-                      <span style={{ fontSize: 13, color: "#999" }}>{m.age} · {m.gender}</span>
-                      {m.timeSlot && m.timeSlot.length > 0 && (
-                        <span style={{ fontSize: 12, color: "#4D96FF" }}>🕐 {m.timeSlot.join(" · ")}</span>
-                      )}
-                      {badge && (
-                        <span style={{ fontSize: 10, fontWeight: 900, padding: "3px 8px", borderRadius: 6, background: badge.color, color: badge.textColor }}>
-                          {badge.label}
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                      {(m.purpose || []).map(p => (
-                        <span key={p} style={{ background: (purposeColor[p] || "#A0A0A0") + "22", color: purposeColor[p] || "#A0A0A0", fontSize: 12, padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>{p}</span>
-                      ))}
-                      <span style={{ color: "#555", fontSize: 12 }}>기록 {(m.notes || []).length}건</span>
-                      {(m.inbody || []).length > 0 && <span style={{ color: "#A78BFA", fontSize: 12 }}>인바디 {(m.inbody || []).length}회</span>}
-                      {(() => {
-                        const sorted = [...(m.inbody || [])].sort((a, b) => a.date.localeCompare(b.date));
-                        if (sorted.length < 2) return null;
-                        const first = sorted[0], last = sorted[sorted.length - 1];
-                        const wd = (first.weight !== null && last.weight !== null) ? Math.round((last.weight - first.weight) * 10) / 10 : null;
-                        const fd = (first.fat !== null && last.fat !== null) ? Math.round((last.fat - first.fat) * 10) / 10 : null;
-                        return (
-                          <>
-                            {wd !== null && wd !== 0 && (
-                              <span style={{ fontSize: 11, fontWeight: 700, color: wd < 0 ? "#4ECDC4" : "#FF9F43" }}>
-                                체중 {wd < 0 ? "↓" : "↑"}{Math.abs(wd)}kg
-                              </span>
-                            )}
-                            {fd !== null && fd !== 0 && (
-                              <span style={{ fontSize: 11, fontWeight: 700, color: fd < 0 ? "#4ECDC4" : "#FF9F43" }}>
-                                체지방 {fd < 0 ? "↓" : "↑"}{Math.abs(fd)}%
-                              </span>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
+                  style={{ position: "relative", background: badge ? badge.color + "08" : "#151821", border: badge ? "2.5px solid " + badge.color : "1px solid #1E2133", borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
+                  {/* Row 1: 이름 + 연령 | 성별 + 뱃지 */}
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6, flexWrap: "wrap", paddingRight: 16 }}>
+                    <span style={{ fontWeight: 800, fontSize: 18, color: "#E8E8E8" }}>{m.name}</span>
+                    <span style={{ fontSize: 13, color: "#888", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                      <span>{shortAge(m.age)}</span>
+                      <span style={{ width: 1, height: 11, background: "#444" }}></span>
+                      <span>{shortGender(m.gender)}</span>
+                    </span>
+                    {badge && (
+                      <span style={{ fontSize: 10, fontWeight: 900, padding: "3px 8px", borderRadius: 6, background: badge.color, color: badge.textColor }}>
+                        {badge.label}
+                      </span>
+                    )}
                   </div>
-                  <span style={{ color: "#444", fontSize: 20 }}>›</span>
+                  {/* Row 2: 🕐 시간 */}
+                  {m.timeSlot && m.timeSlot.length > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10, fontSize: 12, color: "#4D96FF" }}>
+                      <span style={{ fontSize: 11 }}>🕐</span>
+                      <span>{m.timeSlot.map(shortTimeSlot).join(" · ")}</span>
+                    </div>
+                  )}
+                  {/* Row 3: 운동목적 */}
+                  {purposes.length > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+                      {showPurposes.map(p => (
+                        <span key={p} style={{ background: (purposeColor[p] || "#A0A0A0") + "22", color: purposeColor[p] || "#A0A0A0", fontSize: 12, padding: "3px 10px", borderRadius: 8, fontWeight: 600 }}>{p}</span>
+                      ))}
+                      {morePurposes > 0 && (
+                        <span style={{ fontSize: 11, color: "#888", fontWeight: 700, marginLeft: 2 }}>+{morePurposes}</span>
+                      )}
+                    </div>
+                  )}
+                  {/* Stats: 기록·인바디·체중변화 */}
+                  <div style={{ paddingTop: 10, borderTop: "1px solid #1E2133", display: "flex", alignItems: "center", gap: 8, fontSize: 11, flexWrap: "wrap" }}>
+                    <span style={{ color: "#888", fontWeight: 600 }}>기록 {(m.notes || []).length}</span>
+                    {(m.inbody || []).length > 0 && (
+                      <>
+                        <span style={{ color: "#444" }}>·</span>
+                        <span style={{ color: "#888", fontWeight: 600 }}>인바디 {(m.inbody || []).length}회</span>
+                      </>
+                    )}
+                    {weightChange !== null && weightChange !== 0 && (
+                      <>
+                        <span style={{ color: "#444" }}>·</span>
+                        <span style={{ fontWeight: 700, color: weightChange < 0 ? "#4ECDC4" : "#FF9F43" }}>
+                          체중 {weightChange < 0 ? "↓" : "↑"}{Math.abs(weightChange)}kg
+                        </span>
+                      </>
+                    )}
+                    {fatChange !== null && fatChange !== 0 && (
+                      <>
+                        <span style={{ color: "#444" }}>·</span>
+                        <span style={{ fontWeight: 700, color: fatChange < 0 ? "#4ECDC4" : "#FF9F43" }}>
+                          체지방 {fatChange < 0 ? "↓" : "↑"}{Math.abs(fatChange)}%
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <span style={{ position: "absolute", right: 14, top: 18, color: "#444", fontSize: 18 }}>›</span>
                 </div>
                 );
               })}
@@ -1106,9 +1244,74 @@ export default function App() {
 
             {/* 회원 보고서 버튼 */}
             <button onClick={() => window.open(`${window.location.origin}/#/report/${selected.id}`, "_blank")}
-              style={{ width: "100%", background: "linear-gradient(135deg, #4ECDC4 0%, #44A39C 100%)", border: "none", borderRadius: 12, padding: "14px", color: "#0F1117", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 20, letterSpacing: 0.3 }}>
+              style={{ width: "100%", background: "linear-gradient(135deg, #4ECDC4 0%, #44A39C 100%)", border: "none", borderRadius: 12, padding: "14px", color: "#0F1117", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 10, letterSpacing: 0.3 }}>
               📄 회원 보고서 만들기
             </button>
+
+            {/* 트레이너 이동 (관리자만) */}
+            {isAdmin && (
+              <button onClick={openMoveOwner}
+                style={{ width: "100%", background: "#1A1D27", border: "1px solid #F9CA24", borderRadius: 12, padding: "12px", color: "#F9CA24", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 20 }}>
+                👥 다른 트레이너로 이동
+              </button>
+            )}
+
+            {/* 트레이너 이동 모달 */}
+            {moveOwnerOpen && (
+              <div style={{ position: "fixed", inset: 0, background: "#000000bb", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+                onClick={() => setMoveOwnerOpen(false)}>
+                <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: "20px 20px 0 0", padding: "24px 20px 30px", width: "100%", maxWidth: 480 }}
+                  onClick={e => e.stopPropagation()}>
+                  <h3 style={{ margin: "0 0 4px", fontSize: 16, fontWeight: 900, color: "#F9CA24" }}>👥 다른 트레이너로 이동</h3>
+                  <p style={{ margin: "0 0 18px", fontSize: 12, color: "#888" }}>회원의 담당 트레이너와 폴더를 변경합니다</p>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 6 }}>트레이너</label>
+                    <select value={moveOwnerTrainer} onChange={e => { setMoveOwnerTrainer(e.target.value); setMoveOwnerFolder(""); }}
+                      style={{ width: "100%", background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 8, padding: "10px 12px", color: "#E8E8E8", fontSize: 14, fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      <option value="">선택해주세요</option>
+                      {users.map(u => (
+                        <option key={u.id} value={u.id}>{u.name || u.id}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div style={{ marginBottom: 18 }}>
+                    <label style={{ fontSize: 12, color: "#888", display: "block", marginBottom: 6 }}>폴더</label>
+                    {(() => {
+                      const targetUser = users.find(u => u.id === moveOwnerTrainer);
+                      const folders = targetUser?.folders || [];
+                      if (moveOwnerTrainer && folders.length === 0) {
+                        return (
+                          <div style={{ background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 8, padding: "10px 12px", fontSize: 13, color: "#F9CA24", lineHeight: 1.5 }}>
+                            ⚠️ 이 트레이너는 폴더가 없어요.<br/>
+                            <span style={{ color: "#888", fontSize: 12 }}>이동하면 '회원님들' 폴더가 자동 생성됩니다</span>
+                          </div>
+                        );
+                      }
+                      return (
+                        <select value={moveOwnerFolder} onChange={e => setMoveOwnerFolder(e.target.value)} disabled={!moveOwnerTrainer}
+                          style={{ width: "100%", background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 8, padding: "10px 12px", color: "#E8E8E8", fontSize: 14, fontFamily: "'Noto Sans KR', sans-serif", opacity: moveOwnerTrainer ? 1 : 0.5 }}>
+                          <option value="">선택해주세요</option>
+                          {folders.map(f => (
+                            <option key={f.key} value={f.key}>{f.label}</option>
+                          ))}
+                        </select>
+                      );
+                    })()}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <button onClick={() => setMoveOwnerOpen(false)}
+                      style={{ background: "#2A2D3E", border: "none", borderRadius: 10, padding: 12, color: "#888", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>취소</button>
+                    <button onClick={moveToTrainer} disabled={saving}
+                      style={{ background: "#F9CA24", border: "none", borderRadius: 10, padding: 12, color: "#0F1117", fontSize: 14, fontWeight: 800, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      {saving ? "이동중..." : "이동하기"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div style={{ display: "flex", background: "#151821", borderRadius: 12, padding: 4, gap: 4, marginBottom: 20 }}>
               {[{ key: "record", label: "📋 건강 기록" }, { key: "inbody", label: "📊 인바디" }, { key: "survey", label: "📝 설문지" }].map(tab => (
@@ -1121,7 +1324,15 @@ export default function App() {
 
             {activeTab === "record" && (
               <div>
-                <h3 style={{ fontSize: 14, color: "#888", fontWeight: 500, margin: "0 0 14px" }}>건강 기록 히스토리</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "0 0 14px" }}>
+                  <h3 style={{ fontSize: 14, color: "#888", fontWeight: 500, margin: 0 }}>건강 기록 히스토리</h3>
+                  {(selected.notes || []).length > 0 && (
+                    <button onClick={() => { setEditNotesMode(!editNotesMode); cancelEditNote(); }}
+                      style={{ background: editNotesMode ? "#4ECDC4" : "#1A1D27", color: editNotesMode ? "#0F1117" : "#888", border: "1px solid " + (editNotesMode ? "#4ECDC4" : "#2A2D3E"), borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      {editNotesMode ? "✓ 완료" : "✏️ 수정"}
+                    </button>
+                  )}
+                </div>
                 <div style={{ marginBottom: 24 }}>
                   {(selected.notes || []).length === 0 && <p style={{ color: "#555", fontSize: 14, textAlign: "center", marginTop: 20 }}>기록이 없습니다</p>}
                   {(selected.notes || []).map((note, i) => (
@@ -1130,13 +1341,35 @@ export default function App() {
                         <div style={{ width: 10, height: 10, borderRadius: "50%", background: i === selected.notes.length - 1 ? "#4ECDC4" : "#2A2D3E", border: "2px solid " + (i === selected.notes.length - 1 ? "#4ECDC4" : "#3A3D4E"), flexShrink: 0, marginTop: 4 }} />
                         {i < selected.notes.length - 1 && <div style={{ width: 1, flex: 1, background: "#1E2133", marginTop: 4 }} />}
                       </div>
-                      <div style={{ flex: 1, background: "#151821", border: "1px solid #1E2133", borderRadius: 12, padding: "12px 14px" }}>
-                        <div style={{ fontSize: 11, color: "#4ECDC4", fontWeight: 600, marginBottom: 6 }}>
-                          📅 {formatDate(note.date)}
-                          {i === 0 && <span style={{ marginLeft: 8, color: "#888", fontWeight: 400 }}>등록</span>}
-                          {i === selected.notes.length - 1 && i !== 0 && <span style={{ marginLeft: 8, color: "#A78BFA", fontWeight: 400 }}>최신</span>}
-                        </div>
-                        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#D0D0D0" }}>{note.text}</p>
+                      <div style={{ flex: 1, background: "#151821", border: "1px solid " + (editingNoteIdx === i ? "#4ECDC4" : "#1E2133"), borderRadius: 12, padding: "12px 14px" }}>
+                        {editingNoteIdx === i ? (
+                          <>
+                            <input type="date" value={editingNoteDate} onChange={e => setEditingNoteDate(e.target.value)}
+                              onClick={e => { try { e.currentTarget.showPicker?.(); } catch (err) {} }}
+                              style={{ background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 8, padding: "8px 10px", color: "#E8E8E8", fontSize: 12, marginBottom: 8, colorScheme: "dark", cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }} />
+                            <textarea value={editingNoteText} onChange={e => setEditingNoteText(e.target.value)} rows={3}
+                              style={{ width: "100%", background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 8, padding: "8px 10px", color: "#E8E8E8", fontSize: 13, lineHeight: 1.6, resize: "vertical", fontFamily: "'Noto Sans KR', sans-serif", outline: "none", marginBottom: 10 }} />
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button onClick={saveEditNote} disabled={saving} style={{ flex: 1, background: "#4ECDC4", color: "#0F1117", border: "none", borderRadius: 8, padding: "8px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Noto Sans KR', sans-serif" }}>저장</button>
+                              <button onClick={cancelEditNote} style={{ flex: 1, background: "#2A2D3E", color: "#E8E8E8", border: "none", borderRadius: 8, padding: "8px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Noto Sans KR', sans-serif" }}>취소</button>
+                              <button onClick={() => deleteNote(i)} style={{ background: "transparent", color: "#FF6B6B", border: "1px solid #FF6B6B", borderRadius: 8, padding: "8px 12px", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Noto Sans KR', sans-serif" }}>삭제</button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div style={{ fontSize: 11, color: "#4ECDC4", fontWeight: 600, marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <span>
+                                📅 {formatDate(note.date)}
+                                {i === 0 && <span style={{ marginLeft: 8, color: "#888", fontWeight: 400 }}>등록</span>}
+                                {i === selected.notes.length - 1 && i !== 0 && <span style={{ marginLeft: 8, color: "#A78BFA", fontWeight: 400 }}>최신</span>}
+                              </span>
+                              {editNotesMode && (
+                                <button onClick={() => startEditNote(i)} style={{ background: "transparent", border: "1px solid #4ECDC4", color: "#4ECDC4", borderRadius: 6, padding: "2px 8px", fontSize: 11, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 600 }}>편집</button>
+                              )}
+                            </div>
+                            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#D0D0D0", whiteSpace: "pre-wrap" }}>{note.text}</p>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}

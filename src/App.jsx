@@ -1155,7 +1155,7 @@ export default function App() {
                 }
                 return (
                 <div key={m.id} onClick={() => openDetail(m)}
-                  style={{ position: "relative", background: badge ? badge.color + "08" : (!submittedSurveys.has(m.id) ? "#FF6B6B05" : "#151821"), border: badge ? "2.5px solid " + badge.color : (!submittedSurveys.has(m.id) ? "1px solid #FF6B6B55" : "1px solid #1E2133"), borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
+                  style={{ position: "relative", background: badge ? badge.color + "08" : ((!submittedSurveys.has(m.id) && !m.surveyOffline) ? "#FF6B6B05" : "#151821"), border: badge ? "2.5px solid " + badge.color : ((!submittedSurveys.has(m.id) && !m.surveyOffline) ? "1px solid #FF6B6B55" : "1px solid #1E2133"), borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
                   {/* Row 1: 이름 + 연령 | 성별 + 뱃지 */}
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6, flexWrap: "wrap", paddingRight: 16 }}>
                     <span style={{ fontWeight: 800, fontSize: 18, color: "#E8E8E8" }}>{m.name}</span>
@@ -1169,7 +1169,7 @@ export default function App() {
                         {badge.label}
                       </span>
                     )}
-                    {!submittedSurveys.has(m.id) && !badge && (
+                    {!submittedSurveys.has(m.id) && !m.surveyOffline && !badge && (
                       <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#FF6B6B22", color: "#FF6B6B", border: "1px solid #FF6B6B66", display: "inline-flex", alignItems: "center", gap: 4 }}>
                         <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#FF6B6B" }}></span>
                         설문 미제출
@@ -1434,7 +1434,7 @@ export default function App() {
             {activeTab === "survey" && (
               <div>
                 {/* 링크 공유 - 설문 미제출 시에만 노출 */}
-                {!survey && (
+                {!survey && !selected.surveyOffline && (
                   <div style={{ background: "linear-gradient(135deg, #FF6B6B15 0%, #15182100 100%)", border: "1px solid #FF6B6B55", borderRadius: 14, padding: "24px 20px", marginBottom: 16, textAlign: "center" }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
                     <h3 style={{ fontSize: 16, color: "#FF6B6B", marginBottom: 8, fontWeight: 800 }}>아직 설문이 제출되지 않았어요</h3>
@@ -1448,8 +1448,32 @@ export default function App() {
                       navigator.clipboard.writeText(`${window.location.origin}/#/survey/${selected.id}`);
                       alert("링크가 복사됐어요!");
                     }}
-                      style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 8 }}>
                       🔗 링크 복사
+                    </button>
+                    <button onClick={async () => {
+                      if (!confirm("이 회원은 종이 설문지로 받았다고 표시할까요?\n(미제출 알림이 사라집니다)")) return;
+                      await updateDoc(doc(db, "members", selected.id), { surveyOffline: true });
+                    }}
+                      style={{ width: "100%", background: "transparent", border: "1px solid #2A2D3E", borderRadius: 10, padding: "10px", color: "#888", fontWeight: 600, fontSize: 12, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      📝 종이로 받았어요
+                    </button>
+                  </div>
+                )}
+
+                {/* 종이 설문 표시 */}
+                {!survey && selected.surveyOffline && (
+                  <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 14, padding: "16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 13, color: "#E8E8E8", fontWeight: 600, marginBottom: 2 }}>📝 종이 설문지로 받음</div>
+                      <div style={{ fontSize: 11, color: "#555" }}>오프라인 설문 완료 처리됨</div>
+                    </div>
+                    <button onClick={async () => {
+                      if (!confirm("종이 설문 완료 표시를 취소할까요?")) return;
+                      await updateDoc(doc(db, "members", selected.id), { surveyOffline: false });
+                    }}
+                      style={{ background: "transparent", border: "1px solid #2A2D3E", borderRadius: 8, padding: "6px 10px", color: "#666", fontSize: 11, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      취소
                     </button>
                   </div>
                 )}

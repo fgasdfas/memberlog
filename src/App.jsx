@@ -1170,6 +1170,21 @@ export default function App() {
                         설문 미제출
                       </span>
                     )}
+                    {(() => {
+                      // 다이어트 목적 + 인바디 1회 이상 + 마지막 측정 14일 이상 경과 → 회색 배지
+                      const isDiet = (m.purpose || []).includes("다이어트");
+                      if (!isDiet || !sortedInbody.length) return null;
+                      const lastDate = sortedInbody[sortedInbody.length - 1].date;
+                      if (!lastDate) return null;
+                      const daysSince = Math.floor((Date.now() - new Date(lastDate).getTime()) / (1000 * 60 * 60 * 24));
+                      if (daysSince < 14) return null;
+                      const weeks = Math.floor(daysSince / 7);
+                      return (
+                        <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 6, background: "#2A2D3E", color: "#888" }}>
+                          📊 {weeks}주째
+                        </span>
+                      );
+                    })()}
                   </div>
                   {/* Row 2: 🕐 시간 */}
                   {m.timeSlot && m.timeSlot.length > 0 && (

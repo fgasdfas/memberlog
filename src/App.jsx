@@ -590,7 +590,7 @@ export default function App() {
             })}
           </div>
         )},
-        { label: "등록 날짜", child: <input type="date" value={form.registeredDate} onChange={e => setForm({...form, registeredDate: e.target.value})} style={{...inputStyle, colorScheme: "dark"}} /> },
+        { label: "등록 날짜", child: <input type="date" value={form.registeredDate} onChange={e => setForm({...form, registeredDate: e.target.value})} onClick={e => { try { e.currentTarget.showPicker?.(); } catch (err) {} }} style={{...inputStyle, colorScheme: "dark", cursor: "pointer"}} /> },
         { label: "선호 수업 시간대", child: (
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {["이른아침(06-09시)", "오전(09-12시)", "오후(12-17시)", "저녁(17-21시)", "주말"].map(t => {
@@ -1082,6 +1082,12 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            {/* 회원 보고서 버튼 */}
+            <button onClick={() => window.open(`${window.location.origin}/#/report/${selected.id}`, "_blank")}
+              style={{ width: "100%", background: "linear-gradient(135deg, #4ECDC4 0%, #44A39C 100%)", border: "none", borderRadius: 12, padding: "14px", color: "#0F1117", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 20, letterSpacing: 0.3 }}>
+              📄 회원 보고서 만들기
+            </button>
 
             <div style={{ display: "flex", background: "#151821", borderRadius: 12, padding: 4, gap: 4, marginBottom: 20 }}>
               {[{ key: "record", label: "📋 건강 기록" }, { key: "inbody", label: "📊 인바디" }, { key: "survey", label: "📝 설문지" }].map(tab => (

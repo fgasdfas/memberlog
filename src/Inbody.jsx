@@ -60,6 +60,7 @@ export default function Inbody() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [tab, setTab] = useState("input"); // "input" | "graph" | "survey"
+  const [showSurveyDetail, setShowSurveyDetail] = useState(false);
 
   const [form, setForm] = useState({
     date: today(),
@@ -613,6 +614,47 @@ export default function Inbody() {
               제출하신 설문 내용은 읽기 전용입니다.<br/>
               수정이 필요하시면 트레이너에게 요청해주세요.
             </p>
+
+            {/* 상세보기 / 원본 버튼 */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
+              <button onClick={() => setShowSurveyDetail(!showSurveyDetail)}
+                style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 10, padding: "11px", color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: font }}>
+                {showSurveyDetail ? "접기 ▲" : "상세 내용 보기 ▼"}
+              </button>
+              <button onClick={() => window.open(`${window.location.origin}/#/survey-view/${memberId}`, "_blank")}
+                style={{ background: "#151821", border: "1px solid #4ECDC4", borderRadius: 10, padding: "11px", color: "#4ECDC4", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: font }}>
+                📄 원본
+              </button>
+            </div>
+
+            {/* 상세 내용 (펼치기) */}
+            {showSurveyDetail && (
+              <div style={{ marginTop: 14, background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: 18 }}>
+                {survey.pt && (
+                  <>
+                    <div style={{ fontSize: 12, color: "#4ECDC4", fontWeight: 700, marginBottom: 12, letterSpacing: 0.8 }}>📋 PT 설문 상세</div>
+                    {survey.pt.height && <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1E2133", fontSize: 13 }}><span style={{ color: "#888" }}>키</span><span style={{ color: "#E8E8E8" }}>{survey.pt.height} cm</span></div>}
+                    {survey.pt.weight && <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1E2133", fontSize: 13 }}><span style={{ color: "#888" }}>체중</span><span style={{ color: "#E8E8E8" }}>{survey.pt.weight} kg</span></div>}
+                    {survey.pt.exerciseExperience && <div style={{ padding: "8px 0", borderBottom: "1px solid #1E2133" }}><div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>운동 경험</div><div style={{ fontSize: 13, color: "#E8E8E8", lineHeight: 1.6 }}>{survey.pt.exerciseExperience}</div></div>}
+                    {survey.pt.healthDetail && <div style={{ padding: "8px 0", borderBottom: "1px solid #1E2133" }}><div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>건강 상세</div><div style={{ fontSize: 13, color: "#E8E8E8", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{survey.pt.healthDetail}</div></div>}
+                    {survey.pt.injury && <div style={{ padding: "8px 0", borderBottom: "1px solid #1E2133" }}><div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>부상 이력</div><div style={{ fontSize: 13, color: "#E8E8E8", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{survey.pt.injury}</div></div>}
+                    {survey.pt.surgery && <div style={{ padding: "8px 0", borderBottom: "1px solid #1E2133" }}><div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>수술 이력</div><div style={{ fontSize: 13, color: "#E8E8E8", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{survey.pt.surgery}</div></div>}
+                    {survey.pt.note && <div style={{ padding: "8px 0", borderBottom: "1px solid #1E2133" }}><div style={{ fontSize: 13, color: "#888", marginBottom: 4 }}>기타 메모</div><div style={{ fontSize: 13, color: "#E8E8E8", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{survey.pt.note}</div></div>}
+                  </>
+                )}
+                {survey.parqAnswers && (
+                  <>
+                    <div style={{ fontSize: 12, color: "#4ECDC4", fontWeight: 700, margin: "16px 0 12px", letterSpacing: 0.8 }}>🩺 PAR-Q 응답</div>
+                    {survey.parqAnswers.map((a, i) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1E2133", fontSize: 12 }}>
+                        <span style={{ color: "#888", maxWidth: "70%" }}>Q{i + 1}</span>
+                        <span style={{ color: a === true ? "#FF6B6B" : "#4ECDC4", fontWeight: 700 }}>{a === true ? "예" : a === false ? "아니오" : "-"}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>

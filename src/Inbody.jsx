@@ -55,10 +55,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function Inbody() {
   const { memberId } = useParams();
   const [member, setMember] = useState(null);
+  const [survey, setSurvey] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  const [tab, setTab] = useState("input"); // "input" | "graph"
+  const [tab, setTab] = useState("input"); // "input" | "graph" | "survey"
 
   const [form, setForm] = useState({
     date: today(),
@@ -75,6 +76,10 @@ export default function Inbody() {
       if (snap.exists()) setMember({ id: snap.id, ...snap.data() });
       setLoading(false);
     }).catch(() => setLoading(false));
+    // 설문 데이터 같이 로드
+    getDoc(doc(db, "surveys", memberId)).then(snap => {
+      if (snap.exists()) setSurvey({ id: snap.id, ...snap.data() });
+    }).catch(() => {});
   }, [memberId]);
 
   const [editingIdx, setEditingIdx] = useState(null);
@@ -198,13 +203,14 @@ export default function Inbody() {
         </div>
 
         {/* 탭 */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: survey ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8, marginBottom: 24 }}>
           {[
             { key: "input", label: "📝 기록 입력" },
             { key: "graph", label: "📈 변화 그래프" },
+            ...(survey ? [{ key: "survey", label: "📋 내 설문지" }] : []),
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              style={{ padding: "12px", borderRadius: 12, border: "1px solid", fontFamily: font, fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all 0.2s",
+              style={{ padding: "12px", borderRadius: 12, border: "1px solid", fontFamily: font, fontWeight: 700, fontSize: 13, cursor: "pointer", transition: "all 0.2s",
                 background: tab === t.key ? "#4ECDC4" : "#151821",
                 color: tab === t.key ? "#0F1117" : "#888",
                 borderColor: tab === t.key ? "#4ECDC4" : "#2A2D3E",
@@ -526,6 +532,87 @@ export default function Inbody() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* 내 설문지 탭 (읽기 전용) */}
+        {tab === "survey" && survey && (
+          <div>
+            <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: 18, marginBottom: 14 }}>
+              <div style={{ fontSize: 12, color: "#888", marginBottom: 4 }}>제출일</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#4ECDC4" }}>
+                {survey.submittedAt?.toDate ? survey.submittedAt.toDate().toLocaleDateString("ko-KR") : "-"}
+              </div>
+            </div>
+
+            {/* PT 정보 */}
+            {survey.pt && (
+              <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: 18, marginBottom: 14 }}>
+                <h3 style={{ margin: "0 0 14px", fontSize: 14, color: "#4ECDC4", fontWeight: 700 }}>📝 기본 정보</h3>
+                {[
+                  { label: "이름", value: survey.pt.name },
+                  { label: "연령대", value: survey.pt.age },
+                  { label: "성별", value: survey.pt.gender },
+                  { label: "연락처", value: survey.pt.phone },
+                  { label: "운동 목적", value: (survey.pt.purpose || []).join(", ") },
+                  { label: "선호 시간", value: (survey.pt.timeSlot || []).join(", ") },
+                  { label: "건강 상태", value: survey.pt.healthDetail },
+                  { label: "복용약", value: survey.pt.medication },
+                ].filter(r => r.value).map((r, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1E2133", fontSize: 13 }}>
+                    <span style={{ color: "#888" }}>{r.label}</span>
+                    <span style={{ color: "#E8E8E8", fontWeight: 500, textAlign: "right", maxWidth: "60%" }}>{r.value}</span>
+                  </div>
+                ))}
+                {survey.pt.painZones?.length > 0 && (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{ fontSize: 12, color: "#888", marginBottom: 8 }}>통증·불편한 부위</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {(survey.pt.painZones || []).map((z, i) => {
+                        const label = typeof z === "string" ? z : (z?.label || "");
+                        if (!label) return null;
+                        return <span key={i} style={{ padding: "4px 10px", background: "#FF6B6B22", color: "#FF6B6B", borderRadius: 8, fontSize: 12, fontWeight: 600 }}>{label}</span>;
+                      })}
+                    </div>
+                  </div>
+                )}
+                {survey.noPain && <div style={{ marginTop: 10, fontSize: 13, color: "#4ECDC4" }}>✅ 통증 없음</div>}
+              </div>
+            )}
+
+            {/* PAR-Q */}
+            <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: 18, marginBottom: 14 }}>
+              <h3 style={{ margin: "0 0 8px", fontSize: 14, color: "#4ECDC4", fontWeight: 700 }}>🩺 PAR-Q 신체활동 사전 설문</h3>
+              <div style={{ fontSize: 12, color: survey.parqHasYes ? "#FF6B6B" : "#4ECDC4", marginBottom: 12, fontWeight: 600 }}>
+                {survey.parqHasYes ? "⚠️ '예' 응답이 있어 추가 확인 필요" : "✅ 모든 항목 '아니오'"}
+              </div>
+            </div>
+
+            {/* 동의·서명 */}
+            <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: 18, marginBottom: 14 }}>
+              <h3 style={{ margin: "0 0 14px", fontSize: 14, color: "#4ECDC4", fontWeight: 700 }}>✍️ 동의 및 서명</h3>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13 }}>
+                <span style={{ color: "#888" }}>개인정보 수집·이용</span>
+                <span style={{ color: survey.privacyAgree1 ? "#4ECDC4" : "#888" }}>{survey.privacyAgree1 ? "✓ 동의" : "미동의"}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13 }}>
+                <span style={{ color: "#888" }}>민감정보 수집·이용</span>
+                <span style={{ color: survey.privacyAgree2 ? "#4ECDC4" : "#888" }}>{survey.privacyAgree2 ? "✓ 동의" : "미동의"}</span>
+              </div>
+              {survey.signature && (
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontSize: 12, color: "#888", marginBottom: 6 }}>서명</div>
+                  <div style={{ background: "#fff", borderRadius: 8, padding: 10 }}>
+                    <img src={survey.signature} alt="서명" style={{ width: "100%", display: "block" }} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <p style={{ fontSize: 11, color: "#555", textAlign: "center", margin: "14px 0", lineHeight: 1.6 }}>
+              제출하신 설문 내용은 읽기 전용입니다.<br/>
+              수정이 필요하시면 트레이너에게 요청해주세요.
+            </p>
           </div>
         )}
       </main>

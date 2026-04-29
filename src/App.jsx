@@ -1407,23 +1407,25 @@ export default function App() {
 
             {activeTab === "survey" && (
               <div>
-                {/* 링크 공유 */}
-                <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 16, padding: "16px", marginBottom: 16 }}>
-                  <h4 style={{ margin: "0 0 10px", fontSize: 14, color: "#E8E8E8", fontWeight: 600 }}>🔗 설문지 링크 공유</h4>
-                  <p style={{ fontSize: 13, color: "#888", margin: "0 0 12px", lineHeight: 1.6 }}>
-                    회원에게 링크를 보내면 PAR-Q 설문지를 작성할 수 있어요.
-                  </p>
-                  <div style={{ background: "#0F1117", borderRadius: 8, padding: "10px 14px", marginBottom: 10, wordBreak: "break-all", fontSize: 13, color: "#4ECDC4" }}>
-                    {`${window.location.origin}/#/survey/${selected.id}`}
+                {/* 링크 공유 - 설문 미제출 시에만 노출 */}
+                {!survey && (
+                  <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 16, padding: "16px", marginBottom: 16 }}>
+                    <h4 style={{ margin: "0 0 10px", fontSize: 14, color: "#E8E8E8", fontWeight: 600 }}>🔗 설문지 링크 공유</h4>
+                    <p style={{ fontSize: 13, color: "#888", margin: "0 0 12px", lineHeight: 1.6 }}>
+                      회원에게 링크를 보내면 PAR-Q 설문지를 작성할 수 있어요.
+                    </p>
+                    <div style={{ background: "#0F1117", borderRadius: 8, padding: "10px 14px", marginBottom: 10, wordBreak: "break-all", fontSize: 13, color: "#4ECDC4" }}>
+                      {`${window.location.origin}/#/survey/${selected.id}`}
+                    </div>
+                    <button onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/#/survey/${selected.id}`);
+                      alert("링크가 복사됐어요!");
+                    }}
+                      style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      링크 복사
+                    </button>
                   </div>
-                  <button onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/#/survey/${selected.id}`);
-                    alert("링크가 복사됐어요!");
-                  }}
-                    style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-                    링크 복사
-                  </button>
-                </div>
+                )}
 
                 {/* 설문지 결과 */}
                 {survey ? (

@@ -251,9 +251,11 @@ export default function Inbody() {
             <div>
               {/* 측정일 */}
               <div style={{ marginBottom: 20 }}>
-                <label style={{ fontSize: 13, color: "#888", display: "block", marginBottom: 8 }}>측정일</label>
-                <input type="date" value={form.date} max={today()} onChange={e => setForm({ ...form, date: e.target.value })}
-                  style={{ ...iStyle, colorScheme: "dark", textAlign: "left" }} />
+                <label style={{ display: "block", cursor: "pointer" }}>
+                  <span style={{ fontSize: 13, color: "#888", display: "block", marginBottom: 8 }}>측정일</span>
+                  <input type="date" value={form.date} max={today()} onChange={e => setForm({ ...form, date: e.target.value })}
+                    style={{ ...iStyle, colorScheme: "dark", textAlign: "left", padding: "18px 14px", fontSize: 16, cursor: "pointer", width: "100%" }} />
+                </label>
               </div>
 
               {/* 인바디 수치 입력 */}

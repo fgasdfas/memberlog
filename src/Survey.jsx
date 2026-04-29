@@ -138,97 +138,49 @@ const Card = ({ children }) => (
   </div>
 );
 
-// ─── 통증 맵 ───
-const FRONT_ZONES = [
-  { id: "head",      label: "머리",           sub: null,       style: { top: "0%",   left: "30%",  width: "40%", height: "17%" } },
-  { id: "neck",      label: "목",             sub: null,       style: { top: "17%",  left: "38%",  width: "24%", height: "8%"  } },
-  { id: "sh-l",      label: "왼쪽 어깨",      sub: "shoulder", style: { top: "18%",  left: "7%",   width: "20%", height: "12%" } },
-  { id: "sh-r",      label: "오른쪽 어깨",    sub: "shoulder", style: { top: "18%",  right: "7%",  width: "20%", height: "12%" } },
-  { id: "chest",     label: "가슴",           sub: null,       style: { top: "25%",  left: "27%",  width: "46%", height: "13%" } },
-  { id: "abd",       label: "복부",           sub: null,       style: { top: "38%",  left: "27%",  width: "46%", height: "12%" } },
-  { id: "el-l",      label: "왼쪽 팔꿈치",    sub: "elbow",    style: { top: "37%",  left: "3%",   width: "16%", height: "12%" } },
-  { id: "el-r",      label: "오른쪽 팔꿈치",  sub: "elbow",    style: { top: "37%",  right: "3%",  width: "16%", height: "12%" } },
-  { id: "wr-l",      label: "왼쪽 손목",      sub: "wrist",    style: { top: "52%",  left: "3%",   width: "14%", height: "9%"  } },
-  { id: "wr-r",      label: "오른쪽 손목",    sub: "wrist",    style: { top: "52%",  right: "3%",  width: "14%", height: "9%"  } },
-  { id: "th-l",      label: "왼쪽 허벅지",    sub: null,       style: { top: "57%",  left: "22%",  width: "20%", height: "14%" } },
-  { id: "th-r",      label: "오른쪽 허벅지",  sub: null,       style: { top: "57%",  right: "22%", width: "20%", height: "14%" } },
-  { id: "kn-l",      label: "왼쪽 무릎",      sub: "knee",     style: { top: "68%",  left: "20%",  width: "20%", height: "11%" } },
-  { id: "kn-r",      label: "오른쪽 무릎",    sub: "knee",     style: { top: "68%",  right: "20%", width: "20%", height: "11%" } },
-  { id: "ank-l",     label: "왼쪽 발목",      sub: "ankle",    style: { top: "87%",  left: "18%",  width: "18%", height: "9%"  } },
-  { id: "ank-r",     label: "오른쪽 발목",    sub: "ankle",    style: { top: "87%",  right: "18%", width: "18%", height: "9%"  } },
+// ─── 통증 맵 (단순화: 어깨/팔꿈치/손목/허리/골반/무릎/발목, 앞면만) ───
+const ZONES = [
+  { id: "sh-l",   label: "왼쪽 어깨",     style: { top: "18%", left: "7%",   width: "20%", height: "12%" } },
+  { id: "sh-r",   label: "오른쪽 어깨",   style: { top: "18%", right: "7%",  width: "20%", height: "12%" } },
+  { id: "el-l",   label: "왼쪽 팔꿈치",   style: { top: "37%", left: "3%",   width: "16%", height: "12%" } },
+  { id: "el-r",   label: "오른쪽 팔꿈치", style: { top: "37%", right: "3%",  width: "16%", height: "12%" } },
+  { id: "wr-l",   label: "왼쪽 손목",     style: { top: "52%", left: "3%",   width: "14%", height: "9%"  } },
+  { id: "wr-r",   label: "오른쪽 손목",   style: { top: "52%", right: "3%",  width: "14%", height: "9%"  } },
+  { id: "waist",  label: "허리",          style: { top: "44%", left: "27%",  width: "46%", height: "10%" } },
+  { id: "pel-l",  label: "왼쪽 골반",     style: { top: "54%", left: "22%",  width: "22%", height: "10%" } },
+  { id: "pel-r",  label: "오른쪽 골반",   style: { top: "54%", right: "22%", width: "22%", height: "10%" } },
+  { id: "kn-l",   label: "왼쪽 무릎",     style: { top: "68%", left: "20%",  width: "20%", height: "11%" } },
+  { id: "kn-r",   label: "오른쪽 무릎",   style: { top: "68%", right: "20%", width: "20%", height: "11%" } },
+  { id: "ank-l",  label: "왼쪽 발목",     style: { top: "87%", left: "18%",  width: "18%", height: "9%"  } },
+  { id: "ank-r",  label: "오른쪽 발목",   style: { top: "87%", right: "18%", width: "18%", height: "9%"  } },
 ];
-
-const BACK_ZONES = [
-  { id: "trap",      label: "승모근",          sub: null,       style: { top: "18%",  left: "18%",  width: "64%", height: "10%" } },
-  { id: "upback",    label: "등 위",           sub: null,       style: { top: "28%",  left: "27%",  width: "46%", height: "12%" } },
-  { id: "lowback",   label: "허리",            sub: null,       style: { top: "40%",  left: "27%",  width: "46%", height: "10%" } },
-  { id: "el-b",      label: "팔꿈치",          sub: "elbow",    style: { top: "37%",  left: "3%",   width: "16%", height: "12%" } },
-  { id: "glute-l",   label: "왼쪽 골반",       sub: null,       style: { top: "51%",  left: "22%",  width: "22%", height: "10%" } },
-  { id: "glute-r",   label: "오른쪽 골반",     sub: null,       style: { top: "51%",  right: "22%", width: "22%", height: "10%" } },
-  { id: "ham-l",     label: "왼쪽 햄스트링",   sub: null,       style: { top: "61%",  left: "22%",  width: "20%", height: "12%" } },
-  { id: "ham-r",     label: "오른쪽 햄스트링", sub: null,       style: { top: "61%",  right: "22%", width: "20%", height: "12%" } },
-  { id: "kn-bl",     label: "왼쪽 무릎 뒤",    sub: "knee",     style: { top: "68%",  left: "20%",  width: "20%", height: "11%" } },
-  { id: "kn-br",     label: "오른쪽 무릎 뒤",  sub: "knee",     style: { top: "68%",  right: "20%", width: "20%", height: "11%" } },
-  { id: "cal-l",     label: "왼쪽 종아리",     sub: null,       style: { top: "82%",  left: "20%",  width: "18%", height: "10%" } },
-  { id: "cal-r",     label: "오른쪽 종아리",   sub: null,       style: { top: "82%",  right: "20%", width: "18%", height: "10%" } },
-];
-
-const SUB_OPTS = {
-  elbow:    ["안쪽", "바깥쪽", "전체"],
-  knee:     ["안쪽", "바깥쪽", "앞쪽", "뒤쪽(오금)", "전체"],
-  shoulder: ["앞쪽", "뒤쪽", "위쪽", "전체"],
-  wrist:    ["안쪽", "바깥쪽", "전체"],
-  ankle:    ["안쪽", "바깥쪽", "앞쪽", "전체"],
-};
 
 const BodyMap = ({ value = [], onChange, noPain, onNoPain, gender }) => {
-  const [bodySide, setBodySide] = useState("front");
-  const [subModal, setSubModal] = useState(null); // { id, label, subKey }
-  const [subSelected, setSubSelected] = useState([]);
-
-  const zones = bodySide === "front" ? FRONT_ZONES : BACK_ZONES;
   const bodyColor = gender === "남성" ? "#4A90D9" : gender === "여성" ? "#E87490" : "#3a3a50";
   const bodyStroke = gender === "남성" ? "#3472B0" : gender === "여성" ? "#C45A74" : "#4a4a60";
 
+  // 기존 데이터 호환: 문자열/객체 모두 처리해서 id 추출
+  const getId = (v) => (typeof v === "string" ? v : v?.id);
+  const getLabel = (v) => {
+    if (typeof v === "string") {
+      const found = ZONES.find(z => z.id === v);
+      return found ? found.label : v;
+    }
+    return v?.label || "";
+  };
+
   const handleZoneClick = (z) => {
     onNoPain(false);
-    const ids = value.map(v => typeof v === "string" ? v : v.id);
+    const ids = value.map(getId);
     if (ids.includes(z.id)) {
-      onChange(value.filter(v => (typeof v === "string" ? v : v.id) !== z.id));
+      onChange(value.filter(v => getId(v) !== z.id));
     } else {
-      if (z.sub && SUB_OPTS[z.sub]) {
-        setSubModal(z);
-        setSubSelected([]);
-      } else {
-        onChange([...value, { id: z.id, label: z.label, sub: [] }]);
-      }
+      onChange([...value, { id: z.id, label: z.label }]);
     }
   };
 
-  const confirmSub = () => {
-    onChange([...value, { id: subModal.id, label: subModal.label, sub: subSelected }]);
-    setSubModal(null);
-  };
-
-  const getLabel = (v) => {
-    if (typeof v === "string") return v;
-    return v.sub && v.sub.length ? `${v.label} (${v.sub.join("/")})` : v.label;
-  };
-
-  const getId = (v) => typeof v === "string" ? v : v.id;
-
   return (
     <div>
-      {/* 앞뒤 탭 */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 12 }}>
-        {["front", "back"].map(s => (
-          <button key={s} type="button" onClick={() => setBodySide(s)}
-            style={{ padding: "8px", borderRadius: 8, border: "1px solid " + (bodySide === s ? "#888" : "#2A2D3E"), background: bodySide === s ? "#ffffff10" : "#0F1117", color: bodySide === s ? "#E8E8E8" : "#555", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: font }}>
-            {s === "front" ? "앞면" : "뒷면"}
-          </button>
-        ))}
-      </div>
-
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
         <div style={{ position: "relative", width: 180, flexShrink: 0 }}>
           <svg viewBox="0 0 200 480" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", display: "block" }}>
@@ -264,7 +216,7 @@ const BodyMap = ({ value = [], onChange, noPain, onNoPain, gender }) => {
             <circle cx="130" cy="360" r="6" fill={bodyStroke} opacity="0.5"/>
           </svg>
           {/* 클릭 존 */}
-          {zones.map(z => {
+          {ZONES.map(z => {
             const active = value.some(v => getId(v) === z.id);
             return (
               <div key={z.id} onClick={() => handleZoneClick(z)}
@@ -283,7 +235,7 @@ const BodyMap = ({ value = [], onChange, noPain, onNoPain, gender }) => {
             {value.length === 0 && !noPain && <span style={{ fontSize: 13, color: "#555", fontStyle: "italic" }}>부위를 터치해주세요</span>}
             {noPain && <span style={{ fontSize: 13, color: "#4ECDC4", fontWeight: 600 }}>✓ 통증 없음</span>}
             {value.map((v, i) => (
-              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,107,107,0.15)", border: "1px solid #FF6B6B", borderRadius: 100, padding: "4px 12px", fontSize: 12, color: "#FF6B6B", fontFamily: font }}>
+              <span key={getId(v) || i} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "rgba(255,107,107,0.15)", border: "1px solid #FF6B6B", borderRadius: 100, padding: "4px 12px", fontSize: 12, color: "#FF6B6B", fontFamily: font }}>
                 {getLabel(v)}
                 <button type="button" onClick={() => onChange(value.filter((_, j) => j !== i))} style={{ background: "none", border: "none", color: "#FF6B6B", cursor: "pointer", fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
               </span>
@@ -295,32 +247,6 @@ const BodyMap = ({ value = [], onChange, noPain, onNoPain, gender }) => {
           </button>
         </div>
       </div>
-
-      {/* 세부 선택 모달 */}
-      {subModal && (
-        <div style={{ position: "fixed", inset: 0, background: "#000000bb", zIndex: 1000, display: "flex", alignItems: "flex-end", justifyContent: "center" }}
-          onClick={() => setSubModal(null)}>
-          <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: "20px 20px 0 0", padding: "24px 20px 40px", width: "100%", maxWidth: 480 }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 4 }}>📍 {subModal.label}</div>
-            <div style={{ fontSize: 12, color: "#555", marginBottom: 16 }}>더 자세한 위치를 선택해주세요 (선택 안 해도 됩니다)</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-              {SUB_OPTS[subModal.sub].map(o => (
-                <button key={o} type="button" onClick={() => setSubSelected(prev => prev.includes(o) ? prev.filter(x => x !== o) : [...prev, o])}
-                  style={{ background: subSelected.includes(o) ? "#FF6B6B18" : "#0F1117", border: "1px solid " + (subSelected.includes(o) ? "#FF6B6B" : "#2A2D3E"), borderRadius: 12, padding: "13px 16px", cursor: "pointer", fontSize: 14, color: subSelected.includes(o) ? "#FF6B6B" : "#E8E8E8", fontFamily: font, fontWeight: subSelected.includes(o) ? 700 : 400, textAlign: "left" }}>
-                  {o}
-                </button>
-              ))}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              <button type="button" onClick={() => setSubModal(null)}
-                style={{ background: "#2A2D3E", border: "none", borderRadius: 12, padding: 14, color: "#888", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>그냥 저장</button>
-              <button type="button" onClick={confirmSub}
-                style={{ background: "#FF6B6B", border: "none", borderRadius: 12, padding: 14, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>선택 완료</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

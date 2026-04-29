@@ -247,9 +247,14 @@ export default function SurveyView() {
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "#888", marginBottom: 8 }}>통증·불편한 부위</div>
                   <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    {(pt.painZones || []).map(z => (
-                      <span key={z} style={{ padding: "6px 12px", background: "#FF6B6B22", color: "#FF6B6B", borderRadius: 20, fontSize: 13, fontWeight: 700, margin: "3px" }}>{z}</span>
-                    ))}
+                    {(pt.painZones || []).map((z, i) => {
+                      const label = typeof z === "string" ? z : (z?.label || "");
+                      const key = typeof z === "string" ? z : (z?.id || i);
+                      if (!label) return null;
+                      return (
+                        <span key={key} style={{ padding: "6px 12px", background: "#FF6B6B22", color: "#FF6B6B", borderRadius: 20, fontSize: 13, fontWeight: 700, margin: "3px" }}>{label}</span>
+                      );
+                    })}
                   </div>
                 </div>
               )}

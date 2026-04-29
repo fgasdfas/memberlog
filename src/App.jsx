@@ -1034,6 +1034,27 @@ export default function App() {
                       ))}
                       <span style={{ color: "#555", fontSize: 12 }}>기록 {(m.notes || []).length}건</span>
                       {(m.inbody || []).length > 0 && <span style={{ color: "#A78BFA", fontSize: 12 }}>인바디 {(m.inbody || []).length}회</span>}
+                      {(() => {
+                        const sorted = [...(m.inbody || [])].sort((a, b) => a.date.localeCompare(b.date));
+                        if (sorted.length < 2) return null;
+                        const first = sorted[0], last = sorted[sorted.length - 1];
+                        const wd = (first.weight !== null && last.weight !== null) ? Math.round((last.weight - first.weight) * 10) / 10 : null;
+                        const fd = (first.fat !== null && last.fat !== null) ? Math.round((last.fat - first.fat) * 10) / 10 : null;
+                        return (
+                          <>
+                            {wd !== null && wd !== 0 && (
+                              <span style={{ fontSize: 11, fontWeight: 700, color: wd < 0 ? "#4ECDC4" : "#FF9F43" }}>
+                                체중 {wd < 0 ? "↓" : "↑"}{Math.abs(wd)}kg
+                              </span>
+                            )}
+                            {fd !== null && fd !== 0 && (
+                              <span style={{ fontSize: 11, fontWeight: 700, color: fd < 0 ? "#4ECDC4" : "#FF9F43" }}>
+                                체지방 {fd < 0 ? "↓" : "↑"}{Math.abs(fd)}%
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                   <span style={{ color: "#444", fontSize: 20 }}>›</span>

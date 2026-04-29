@@ -71,13 +71,6 @@ const ADMIN_PASSWORD = "12142659";
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = sessionStorage.getItem("mlUser");
-    if (saved) {
-      // 이전 loginTime을 prevLoginTime에 저장해두고
-      const prev = localStorage.getItem("mlLoginTime");
-      if (prev) localStorage.setItem("mlPrevLoginTime", prev);
-      // loginTime을 현재 시간으로 갱신
-      localStorage.setItem("mlLoginTime", new Date().toISOString());
-    }
     return saved ? JSON.parse(saved) : null;
   });
   const [users, setUsers] = useState([]);
@@ -92,7 +85,10 @@ export default function App() {
   const [view, setView] = useState("list");
   const [folder, setFolder] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [seenMembers, setSeenMembers] = useState(new Set());
+  const [seenMembers, setSeenMembers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("mlViewedMap") || "{}"); }
+    catch (e) { return {}; }
+  });
   const [newNote, setNewNote] = useState("");
   const [noteDate, setNoteDate] = useState(today());
   const [search, setSearch] = useState("");
@@ -201,10 +197,6 @@ export default function App() {
       sessionStorage.setItem("mlUser", JSON.stringify(user));
       // 로그인 시 인바디 리다이렉트 ID 삭제 (트레이너 폰에서 회원 페이지로 가는 문제 방지)
       localStorage.removeItem("inbodyMemberId");
-      // 로그인 시 이전 loginTime 저장 후 갱신
-      const prev = localStorage.getItem("mlLoginTime");
-      if (prev) localStorage.setItem("mlPrevLoginTime", prev);
-      localStorage.setItem("mlLoginTime", new Date().toISOString());
       setCurrentUser(user);
       if (user.folders?.length > 0) {
         setFolder(user.folders[0].key);
@@ -232,31 +224,29 @@ export default function App() {
 
   const folderCount = (key) => members.filter(m => m.folder === key && (isAdmin || !m.owner || m.owner === currentUser?.id)).length;
 
-  // 변동사항 감지 — 이전 접속 시간 기준
-  const loginTime = localStorage.getItem("mlPrevLoginTime") || localStorage.getItem("mlLoginTime");
+  // 변동사항 감지 — 회원별 마지막 확인 시각 기준 (카톡 방식)
   const getChangeBadge = (m) => {
-    if (!loginTime) return null;
-    if (seenMembers.has(m.id)) return null; // 이미 확인한 회원
-    const lt = new Date(loginTime);
+    const viewedAt = seenMembers[m.id] ? new Date(seenMembers[m.id]) : null;
 
-    // 신규 회원 — createdAt이 이전 접속 이후면 NEW
-    if (m.createdAt?.toDate && m.createdAt.toDate() > lt) {
+    // 신규 회원 — 한 번도 본 적 없으면 NEW
+    const created = m.createdAt?.toDate ? m.createdAt.toDate() : null;
+    if (created && (!viewedAt || created > viewedAt)) {
       return { label: "NEW", color: "#FFE600", textColor: "#0F1117" };
     }
 
-    // 설문지 제출 — surveyUpdatedAt이 이전 접속 이후면 표시
+    // 설문지 제출 — 마지막 확인 이후 갱신됐으면 표시
     if (m.surveyUpdatedAt) {
       const surveyUpdated = new Date(m.surveyUpdatedAt);
-      if (!isNaN(surveyUpdated) && surveyUpdated > lt) {
+      if (!isNaN(surveyUpdated) && (!viewedAt || surveyUpdated > viewedAt)) {
         return { label: "설문", color: "#FF9F43", textColor: "#0F1117" };
       }
     }
 
-    // 인바디 — updatedAt이 이전 접속 이후면 표시
+    // 인바디 — 마지막 확인 이후 갱신됐으면 표시
     const latestInbody = [...(m.inbody || [])].sort((a, b) => b.date.localeCompare(a.date))[0];
     if (latestInbody?.updatedAt) {
       const inbodyUpdated = new Date(latestInbody.updatedAt);
-      if (!isNaN(inbodyUpdated) && inbodyUpdated > lt) {
+      if (!isNaN(inbodyUpdated) && (!viewedAt || inbodyUpdated > viewedAt)) {
         return { label: "인바디", color: "#00FFC8", textColor: "#0F1117" };
       }
     }
@@ -275,8 +265,12 @@ export default function App() {
     setShowMoveConfirm(false); setMoveTarget("");
     setShowInbodyAdd(false); setInbodyForm(emptyInbody());
     setActiveTab("record"); setSurvey(null); setShowSurveyDetail(false);
-    // 뱃지 확인 처리
-    setSeenMembers(prev => new Set([...prev, m.id]));
+    // 뱃지 확인 처리 — 이 회원의 마지막 확인 시각 기록
+    setSeenMembers(prev => {
+      const next = { ...prev, [m.id]: new Date().toISOString() };
+      try { localStorage.setItem("mlViewedMap", JSON.stringify(next)); } catch (e) {}
+      return next;
+    });
     // 설문지 불러오기
     getDoc(doc(db, "surveys", m.id)).then(snap => {
       if (snap.exists()) setSurvey(snap.data());

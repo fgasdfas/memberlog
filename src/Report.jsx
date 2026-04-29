@@ -72,7 +72,12 @@ const generateComment = (member, inbody, period) => {
 export default function Report() {
   const { memberId } = useParams();
   const [member, setMember] = useState(null);
-  const [trainerName] = useState("박광덕");
+  const [trainerName, setTrainerName] = useState(() => {
+    try {
+      const u = JSON.parse(sessionStorage.getItem("mlUser") || "{}");
+      return u.name || "박광덕";
+    } catch (e) { return "박광덕"; }
+  });
   const [folderName, setFolderName] = useState("");
   const [comment, setComment] = useState("");
   const [editingComment, setEditingComment] = useState(false);

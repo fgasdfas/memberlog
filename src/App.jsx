@@ -1452,24 +1452,24 @@ export default function App() {
                       🔗 링크 복사
                     </button>
                     <button onClick={async () => {
-                      if (!confirm("이 회원은 종이 설문지로 받았다고 표시할까요?\n(미제출 알림이 사라집니다)")) return;
+                      if (!confirm("이 회원은 오프라인으로 설문을 완료한 상태로 표시할까요?\n(미제출 알림이 사라집니다)")) return;
                       await updateDoc(doc(db, "members", selected.id), { surveyOffline: true });
                     }}
                       style={{ width: "100%", background: "transparent", border: "1px solid #2A2D3E", borderRadius: 10, padding: "10px", color: "#888", fontWeight: 600, fontSize: 12, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-                      📝 종이로 받았어요
+                      ✅ 오프라인 설문 완료로 표시
                     </button>
                   </div>
                 )}
 
-                {/* 종이 설문 표시 */}
+                {/* 오프라인 설문 완료 표시 */}
                 {!survey && selected.surveyOffline && (
                   <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 14, padding: "16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
                     <div>
-                      <div style={{ fontSize: 13, color: "#E8E8E8", fontWeight: 600, marginBottom: 2 }}>📝 종이 설문지로 받음</div>
-                      <div style={{ fontSize: 11, color: "#555" }}>오프라인 설문 완료 처리됨</div>
+                      <div style={{ fontSize: 13, color: "#E8E8E8", fontWeight: 600, marginBottom: 2 }}>✅ 오프라인 설문 완료</div>
+                      <div style={{ fontSize: 11, color: "#555" }}>앱 외부에서 설문을 받음</div>
                     </div>
                     <button onClick={async () => {
-                      if (!confirm("종이 설문 완료 표시를 취소할까요?")) return;
+                      if (!confirm("오프라인 설문 완료 표시를 취소할까요?")) return;
                       await updateDoc(doc(db, "members", selected.id), { surveyOffline: false });
                     }}
                       style={{ background: "transparent", border: "1px solid #2A2D3E", borderRadius: 8, padding: "6px 10px", color: "#666", fontSize: 11, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -1660,13 +1660,13 @@ export default function App() {
                       </div>
                     )}
                   </div>
-                ) : (
+                ) : !selected.surveyOffline ? (
                   <div style={{ textAlign: "center", padding: "40px 20px", color: "#555" }}>
                     <div style={{ fontSize: 40, marginBottom: 12 }}>📝</div>
                     <p style={{ fontSize: 14, fontFamily: "'Noto Sans KR', sans-serif" }}>아직 설문지를 제출하지 않았어요</p>
                     <p style={{ fontSize: 13, color: "#444" }}>위 링크를 회원에게 공유해 주세요</p>
                   </div>
-                )}
+                ) : null}
               </div>
             )}
 

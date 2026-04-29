@@ -242,8 +242,8 @@ export default function App() {
       }
     }
 
-    // 인바디 — 마지막 확인 이후 갱신됐으면 표시
-    const latestInbody = [...(m.inbody || [])].sort((a, b) => b.date.localeCompare(a.date))[0];
+    // 인바디 — 회원이 직접 입력했을 때만 알림 (트레이너 입력은 제외)
+    const latestInbody = [...(m.inbody || [])].filter(e => !e.byTrainer).sort((a, b) => b.date.localeCompare(a.date))[0];
     if (latestInbody?.updatedAt) {
       const inbodyUpdated = new Date(latestInbody.updatedAt);
       if (!isNaN(inbodyUpdated) && (!viewedAt || inbodyUpdated > viewedAt)) {
@@ -318,6 +318,7 @@ export default function App() {
       fat: parseFloat(inbodyForm.fat) || null,
       fatmass: parseFloat(inbodyForm.fatmass) || null,
       bmi: parseFloat(inbodyForm.bmi) || null,
+      byTrainer: true,
     };
     const updatedInbody = [...(selected.inbody || []), newEntry].sort((a, b) => a.date.localeCompare(b.date));
     await updateDoc(doc(db, "members", selected.id), { inbody: updatedInbody });

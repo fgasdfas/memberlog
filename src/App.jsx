@@ -1149,9 +1149,9 @@ export default function App() {
                 const sortedInbody = [...(m.inbody || [])].sort((a, b) => a.date.localeCompare(b.date));
                 let weightChange = null, fatChange = null;
                 if (sortedInbody.length >= 2) {
-                  const first = sortedInbody[0], last = sortedInbody[sortedInbody.length - 1];
-                  if (first.weight !== null && last.weight !== null) weightChange = Math.round((last.weight - first.weight) * 10) / 10;
-                  if (first.fat !== null && last.fat !== null) fatChange = Math.round((last.fat - first.fat) * 10) / 10;
+                  const prev = sortedInbody[sortedInbody.length - 2], last = sortedInbody[sortedInbody.length - 1];
+                  if (prev.weight !== null && last.weight !== null) weightChange = Math.round((last.weight - prev.weight) * 10) / 10;
+                  if (prev.fat !== null && last.fat !== null) fatChange = Math.round((last.fat - prev.fat) * 10) / 10;
                 }
                 return (
                 <div key={m.id} onClick={() => openDetail(m)}

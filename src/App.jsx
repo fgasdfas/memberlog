@@ -1150,7 +1150,7 @@ export default function App() {
                 }
                 return (
                 <div key={m.id} onClick={() => openDetail(m)}
-                  style={{ position: "relative", background: badge ? badge.color + "08" : "#151821", border: badge ? "2.5px solid " + badge.color : "1px solid #1E2133", borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
+                  style={{ position: "relative", background: badge ? badge.color + "08" : (!m.surveyUpdatedAt ? "#FF6B6B05" : "#151821"), border: badge ? "2.5px solid " + badge.color : (!m.surveyUpdatedAt ? "1px solid #FF6B6B55" : "1px solid #1E2133"), borderRadius: 14, padding: "14px 16px", marginBottom: 10, cursor: "pointer", transition: "border-color 0.2s", boxShadow: badge ? "0 0 12px " + badge.color + "22" : "none" }}>
                   {/* Row 1: 이름 + 연령 | 성별 + 뱃지 */}
                   <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6, flexWrap: "wrap", paddingRight: 16 }}>
                     <span style={{ fontWeight: 800, fontSize: 18, color: "#E8E8E8" }}>{m.name}</span>
@@ -1162,6 +1162,12 @@ export default function App() {
                     {badge && (
                       <span style={{ fontSize: 10, fontWeight: 900, padding: "3px 8px", borderRadius: 6, background: badge.color, color: badge.textColor }}>
                         {badge.label}
+                      </span>
+                    )}
+                    {!m.surveyUpdatedAt && !badge && (
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#FF6B6B22", color: "#FF6B6B", border: "1px solid #FF6B6B66", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#FF6B6B" }}></span>
+                        설문 미제출
                       </span>
                     )}
                   </div>
@@ -1330,8 +1336,11 @@ export default function App() {
             <div style={{ display: "flex", background: "#151821", borderRadius: 12, padding: 4, gap: 4, marginBottom: 20 }}>
               {[{ key: "record", label: "📋 건강 기록" }, { key: "inbody", label: "📊 인바디" }, { key: "survey", label: "📝 설문지" }].map(tab => (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 700, fontSize: 12, background: activeTab === tab.key ? "#4ECDC4" : "transparent", color: activeTab === tab.key ? "#0F1117" : "#666", transition: "all 0.18s" }}>
+                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 700, fontSize: 12, background: activeTab === tab.key ? "#4ECDC4" : "transparent", color: activeTab === tab.key ? "#0F1117" : "#666", transition: "all 0.18s", position: "relative" }}>
                   {tab.label}
+                  {tab.key === "survey" && !selected.surveyUpdatedAt && (
+                    <span style={{ position: "absolute", top: 4, right: 6, width: 8, height: 8, borderRadius: "50%", background: "#FF6B6B", boxShadow: "0 0 8px #FF6B6B" }}></span>
+                  )}
                 </button>
               ))}
             </div>
@@ -1409,20 +1418,21 @@ export default function App() {
               <div>
                 {/* 링크 공유 - 설문 미제출 시에만 노출 */}
                 {!survey && (
-                  <div style={{ background: "#151821", border: "1px solid #2A2D3E", borderRadius: 16, padding: "16px", marginBottom: 16 }}>
-                    <h4 style={{ margin: "0 0 10px", fontSize: 14, color: "#E8E8E8", fontWeight: 600 }}>🔗 설문지 링크 공유</h4>
-                    <p style={{ fontSize: 13, color: "#888", margin: "0 0 12px", lineHeight: 1.6 }}>
-                      회원에게 링크를 보내면 PAR-Q 설문지를 작성할 수 있어요.
+                  <div style={{ background: "linear-gradient(135deg, #FF6B6B15 0%, #15182100 100%)", border: "1px solid #FF6B6B55", borderRadius: 14, padding: "24px 20px", marginBottom: 16, textAlign: "center" }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
+                    <h3 style={{ fontSize: 16, color: "#FF6B6B", marginBottom: 8, fontWeight: 800 }}>아직 설문이 제출되지 않았어요</h3>
+                    <p style={{ fontSize: 13, color: "#888", lineHeight: 1.7, marginBottom: 18 }}>
+                      회원에게 링크를 보내<br/>PAR-Q 설문지를 받아주세요
                     </p>
-                    <div style={{ background: "#0F1117", borderRadius: 8, padding: "10px 14px", marginBottom: 10, wordBreak: "break-all", fontSize: 13, color: "#4ECDC4" }}>
+                    <div style={{ background: "#0F1117", borderRadius: 8, padding: "10px 12px", marginBottom: 10, wordBreak: "break-all", fontSize: 12, color: "#4ECDC4" }}>
                       {`${window.location.origin}/#/survey/${selected.id}`}
                     </div>
                     <button onClick={() => {
                       navigator.clipboard.writeText(`${window.location.origin}/#/survey/${selected.id}`);
                       alert("링크가 복사됐어요!");
                     }}
-                      style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-                      링크 복사
+                      style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 800, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                      🔗 링크 복사
                     </button>
                   </div>
                 )}

@@ -199,7 +199,7 @@ export default function Report() {
           </div>
           <div style={{ textAlign: "right", fontSize: 11, color: "#555", lineHeight: 1.7 }}>
             <div><span style={{ color: "#999", marginRight: 6 }}>발행일</span><strong style={{ color: "#0F1117", fontWeight: 700 }}>{fmtFull(new Date())}</strong></div>
-            <div><span style={{ color: "#999", marginRight: 6 }}>담당</span><strong style={{ color: "#0F1117", fontWeight: 700 }}>{trainerName} 트레이너</strong></div>
+            <div><span style={{ color: "#999", marginRight: 6 }}>담당</span><strong style={{ color: "#0F1117", fontWeight: 700 }}>{trainerName}{trainerName === "오리코치" ? "" : " 트레이너"}</strong></div>
             {folderName && <div><span style={{ color: "#999", marginRight: 6 }}>소속</span><strong style={{ color: "#0F1117", fontWeight: 700 }}>{folderName}</strong></div>}
           </div>
         </div>

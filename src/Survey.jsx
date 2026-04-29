@@ -489,6 +489,12 @@ export default function Survey() {
         submittedAt: serverTimestamp(),
         status: "completed",
       });
+      // 알림 감지를 위해 member 문서에도 설문 제출 시각 기록
+      try {
+        await updateDoc(doc(db, "members", targetMemberId), {
+          surveyUpdatedAt: new Date().toISOString(),
+        });
+      } catch (e) { /* 신규 회원 등 일부 케이스는 무시 */ }
       setStep(5);
     } catch (e) { console.error(e); }
     setSubmitting(false);

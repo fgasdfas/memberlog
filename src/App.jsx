@@ -73,10 +73,10 @@ export default function App() {
     const saved = sessionStorage.getItem("mlUser");
     if (saved) {
       // 이전 loginTime을 prevLoginTime에 저장해두고
-      const prev = sessionStorage.getItem("mlLoginTime");
-      if (prev) sessionStorage.setItem("mlPrevLoginTime", prev);
+      const prev = localStorage.getItem("mlLoginTime");
+      if (prev) localStorage.setItem("mlPrevLoginTime", prev);
       // loginTime을 현재 시간으로 갱신
-      sessionStorage.setItem("mlLoginTime", new Date().toISOString());
+      localStorage.setItem("mlLoginTime", new Date().toISOString());
     }
     return saved ? JSON.parse(saved) : null;
   });
@@ -202,9 +202,9 @@ export default function App() {
       // 로그인 시 인바디 리다이렉트 ID 삭제 (트레이너 폰에서 회원 페이지로 가는 문제 방지)
       localStorage.removeItem("inbodyMemberId");
       // 로그인 시 이전 loginTime 저장 후 갱신
-      const prev = sessionStorage.getItem("mlLoginTime");
-      if (prev) sessionStorage.setItem("mlPrevLoginTime", prev);
-      sessionStorage.setItem("mlLoginTime", new Date().toISOString());
+      const prev = localStorage.getItem("mlLoginTime");
+      if (prev) localStorage.setItem("mlPrevLoginTime", prev);
+      localStorage.setItem("mlLoginTime", new Date().toISOString());
       setCurrentUser(user);
       if (user.folders?.length > 0) {
         setFolder(user.folders[0].key);
@@ -233,7 +233,7 @@ export default function App() {
   const folderCount = (key) => members.filter(m => m.folder === key && (isAdmin || !m.owner || m.owner === currentUser?.id)).length;
 
   // 변동사항 감지 — 이전 접속 시간 기준
-  const loginTime = sessionStorage.getItem("mlPrevLoginTime") || sessionStorage.getItem("mlLoginTime");
+  const loginTime = localStorage.getItem("mlPrevLoginTime") || localStorage.getItem("mlLoginTime");
   const getChangeBadge = (m) => {
     if (!loginTime) return null;
     if (seenMembers.has(m.id)) return null; // 이미 확인한 회원
@@ -242,6 +242,14 @@ export default function App() {
     // 신규 회원 — createdAt이 이전 접속 이후면 NEW
     if (m.createdAt?.toDate && m.createdAt.toDate() > lt) {
       return { label: "NEW", color: "#FFE600", textColor: "#0F1117" };
+    }
+
+    // 설문지 제출 — surveyUpdatedAt이 이전 접속 이후면 표시
+    if (m.surveyUpdatedAt) {
+      const surveyUpdated = new Date(m.surveyUpdatedAt);
+      if (!isNaN(surveyUpdated) && surveyUpdated > lt) {
+        return { label: "설문", color: "#FF9F43", textColor: "#0F1117" };
+      }
     }
 
     // 인바디 — updatedAt이 이전 접속 이후면 표시

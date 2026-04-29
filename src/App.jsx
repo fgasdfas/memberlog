@@ -1336,11 +1336,8 @@ export default function App() {
             <div style={{ display: "flex", background: "#151821", borderRadius: 12, padding: 4, gap: 4, marginBottom: 20 }}>
               {[{ key: "record", label: "📋 건강 기록" }, { key: "inbody", label: "📊 인바디" }, { key: "survey", label: "📝 설문지" }].map(tab => (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 700, fontSize: 12, background: activeTab === tab.key ? "#4ECDC4" : "transparent", color: activeTab === tab.key ? "#0F1117" : "#666", transition: "all 0.18s", position: "relative" }}>
+                  style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 700, fontSize: 12, background: activeTab === tab.key ? "#4ECDC4" : "transparent", color: activeTab === tab.key ? "#0F1117" : "#666", transition: "all 0.18s" }}>
                   {tab.label}
-                  {tab.key === "survey" && !selected.surveyUpdatedAt && (
-                    <span style={{ position: "absolute", top: 4, right: 6, width: 8, height: 8, borderRadius: "50%", background: "#FF6B6B", boxShadow: "0 0 8px #FF6B6B" }}></span>
-                  )}
                 </button>
               ))}
             </div>

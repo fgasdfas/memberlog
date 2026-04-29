@@ -243,7 +243,9 @@ export default function App() {
     }
 
     // 인바디 — 회원이 직접 입력했을 때만 알림 (트레이너 입력은 제외)
-    const latestInbody = [...(m.inbody || [])].filter(e => !e.byTrainer).sort((a, b) => b.date.localeCompare(a.date))[0];
+    // updatedAt 기준 가장 최근 입력을 봄 (date 무관)
+    const memberInbodies = (m.inbody || []).filter(e => !e.byTrainer && e.updatedAt);
+    const latestInbody = memberInbodies.sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))[0];
     if (latestInbody?.updatedAt) {
       const inbodyUpdated = new Date(latestInbody.updatedAt);
       if (!isNaN(inbodyUpdated) && (!viewedAt || inbodyUpdated > viewedAt)) {

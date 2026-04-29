@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App.jsx'
 import Survey from './Survey.jsx'
 import Inbody from './Inbody.jsx'
@@ -22,7 +22,7 @@ function InbodyRedirect() {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/survey/:memberId" element={<Survey />} />
@@ -32,6 +32,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/guide/:type" element={<Guide />} />
         <Route path="/diet" element={<Diet />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
 )

@@ -149,7 +149,7 @@ function MemberGuide() {
       </Section>
 
       {/* 식단 가이드 배너 */}
-      <div onClick={() => window.open(`${window.location.origin}/diet`, "_blank")}
+      <div onClick={() => window.open(`${window.location.origin}/#/diet`, "_blank")}
         style={{ background: "linear-gradient(135deg, #6BCB7718, #151821)", border: "1px solid #6BCB7733", borderRadius: 14, padding: "16px 18px", marginBottom: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <div style={{ fontSize: 14, fontWeight: 900, color: "#6BCB77", marginBottom: 4 }}>🥗 식단 가이드</div>

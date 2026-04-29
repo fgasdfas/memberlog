@@ -199,6 +199,8 @@ export default function App() {
     const user = users.find(u => u.id === selectedUserId);
     if (user && pwInput === user.password) {
       sessionStorage.setItem("mlUser", JSON.stringify(user));
+      // 로그인 시 인바디 리다이렉트 ID 삭제 (트레이너 폰에서 회원 페이지로 가는 문제 방지)
+      localStorage.removeItem("inbodyMemberId");
       // 로그인 시 이전 loginTime 저장 후 갱신
       const prev = sessionStorage.getItem("mlLoginTime");
       if (prev) sessionStorage.setItem("mlPrevLoginTime", prev);
@@ -450,7 +452,14 @@ export default function App() {
     setSaving(false); setView("settings");
   };
 
-  if (!currentUser) return (
+  if (!currentUser) {
+    // 저장된 인바디 회원 ID가 있으면 인바디 페이지로 리다이렉트
+    const savedInbodyId = localStorage.getItem("inbodyMemberId");
+    if (savedInbodyId) {
+      window.location.href = `/#/inbody/${savedInbodyId}`;
+      return null;
+    }
+    return (
     <div style={{ minHeight: "100vh", background: "#0F1117", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24, padding: 24 }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
       <div style={{ textAlign: "center" }}>
@@ -517,6 +526,7 @@ export default function App() {
       </button>
     </div>
   );
+  }
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: "#0F1117", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
@@ -653,9 +663,9 @@ export default function App() {
         {/* 메뉴 항목 */}
         <div style={{ flex: 1, padding: "8px 0" }}>
           {[
-            { icon: "📝", label: "신규 회원 설문지", color: "#A78BFA", bg: "#A78BFA22", action: () => { navigator.clipboard.writeText(`${window.location.origin}/survey/new`); alert("설문지 링크가 복사됐어요! 😊"); setMenuOpen(false); } },
+            { icon: "📝", label: "신규 회원 설문지", color: "#A78BFA", bg: "#A78BFA22", action: () => { navigator.clipboard.writeText(`${window.location.origin}/#/survey/new`); alert("설문지 링크가 복사됐어요! 😊"); setMenuOpen(false); } },
             { icon: "💬", label: "카카오톡 문의", color: "#FEE500", bg: "#FEE50018", action: () => { window.open("https://open.kakao.com/o/szxBzqsi", "_blank"); setMenuOpen(false); } },
-            { icon: "📖", label: "사용설명서", color: "#4ECDC4", bg: "#4ECDC418", action: () => { window.open(`${window.location.origin}/guide/trainer`, "_blank"); setMenuOpen(false); } },
+            { icon: "📖", label: "사용설명서", color: "#4ECDC4", bg: "#4ECDC418", action: () => { window.open(`${window.location.origin}/#/guide/trainer`, "_blank"); setMenuOpen(false); } },
             { icon: "⚙️", label: "설정", color: "#888", bg: "#88888818", action: () => { setView("settings"); setMenuOpen(false); } },
           ].map(({ icon, label, color, bg, action }) => (
             <button key={label} onClick={action}
@@ -742,10 +752,10 @@ export default function App() {
                 회원이 제출하면 자동으로 회원 등록이 돼요.
               </p>
               <div style={{ background: "#0F1117", borderRadius: 8, padding: "8px 12px", marginBottom: 10, wordBreak: "break-all", fontSize: 12, color: "#A78BFA" }}>
-                {`${window.location.origin}/survey/new`}
+                {`${window.location.origin}/#/survey/new`}
               </div>
               <button onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/survey/new`);
+                navigator.clipboard.writeText(`${window.location.origin}/#/survey/new`);
                 alert("신규 회원용 설문지 링크가 복사됐어요!");
               }}
                 style={{ width: "100%", background: "#A78BFA", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -757,11 +767,11 @@ export default function App() {
             <div style={{ marginTop: 24, marginBottom: 8 }}>
               <h3 style={{ fontSize: 14, color: "#888", fontWeight: 500, margin: "0 0 12px" }}>📖 사용설명서</h3>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                <button onClick={() => window.open(`${window.location.origin}/guide/trainer`, "_blank")}
+                <button onClick={() => window.open(`${window.location.origin}/#/guide/trainer`, "_blank")}
                   style={{ background: "#151821", border: "1px solid #4ECDC444", borderRadius: 12, padding: "14px", color: "#4ECDC4", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
                   🏋️ 트레이너용
                 </button>
-                <button onClick={() => window.open(`${window.location.origin}/guide/member`, "_blank")}
+                <button onClick={() => window.open(`${window.location.origin}/#/guide/member`, "_blank")}
                   style={{ background: "#151821", border: "1px solid #6BCB7744", borderRadius: 12, padding: "14px", color: "#6BCB77", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
                   👤 회원용
                 </button>
@@ -1125,10 +1135,10 @@ export default function App() {
                     회원에게 링크를 보내면 PAR-Q 설문지를 작성할 수 있어요.
                   </p>
                   <div style={{ background: "#0F1117", borderRadius: 8, padding: "10px 14px", marginBottom: 10, wordBreak: "break-all", fontSize: 13, color: "#4ECDC4" }}>
-                    {`${window.location.origin}/survey/${selected.id}`}
+                    {`${window.location.origin}/#/survey/${selected.id}`}
                   </div>
                   <button onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/survey/${selected.id}`);
+                    navigator.clipboard.writeText(`${window.location.origin}/#/survey/${selected.id}`);
                     alert("링크가 복사됐어요!");
                   }}
                     style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 10, padding: "11px", color: "#0F1117", fontWeight: 700, fontSize: 14, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -1174,11 +1184,11 @@ export default function App() {
                           style={{ flex: 2, background: "#2A2D3E", border: "none", borderRadius: 10, padding: "10px", color: "#E8E8E8", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
                           {showSurveyDetail ? "접기 ▲" : "상세 내용 보기 ▼"}
                         </button>
-                        <button onClick={() => window.open(`${window.location.origin}/survey-view/${selected.id}`, "_blank")}
+                        <button onClick={() => window.open(`${window.location.origin}/#/survey-view/${selected.id}`, "_blank")}
                           style={{ flex: 1, background: "#4ECDC422", border: "1px solid #4ECDC444", borderRadius: 10, padding: "10px", color: "#4ECDC4", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
                           📄 원본
                         </button>
-                        <button onClick={() => window.open(`${window.location.origin}/survey/${selected.id}?edit=1`, "_blank")}
+                        <button onClick={() => window.open(`${window.location.origin}/#/survey/${selected.id}?edit=1`, "_blank")}
                           style={{ flex: 1, background: "#1A0F0F", border: "1px solid #FFA50044", borderRadius: 10, padding: "10px", color: "#FFA500", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
                           ✏️ 수정
                         </button>
@@ -1337,7 +1347,7 @@ export default function App() {
                     <div style={{ fontSize: 12, color: "#555" }}>회원이 직접 수치를 입력할 수 있어요</div>
                   </div>
                   <button onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/inbody/${selected.id}`);
+                    navigator.clipboard.writeText(`${window.location.origin}/#/inbody/${selected.id}`);
                     alert("링크가 복사됐어요!");
                   }}
                     style={{ background: "#4ECDC422", border: "1px solid #4ECDC444", borderRadius: 8, padding: "8px 14px", color: "#4ECDC4", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", whiteSpace: "nowrap" }}>

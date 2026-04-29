@@ -152,8 +152,8 @@ const FRONT_ZONES = [
   { id: "wr-r",      label: "오른쪽 손목",    sub: "wrist",    style: { top: "52%",  right: "3%",  width: "14%", height: "9%"  } },
   { id: "th-l",      label: "왼쪽 허벅지",    sub: null,       style: { top: "57%",  left: "22%",  width: "20%", height: "14%" } },
   { id: "th-r",      label: "오른쪽 허벅지",  sub: null,       style: { top: "57%",  right: "22%", width: "20%", height: "14%" } },
-  { id: "kn-l",      label: "왼쪽 무릎",      sub: "knee",     style: { top: "72%",  left: "22%",  width: "18%", height: "10%" } },
-  { id: "kn-r",      label: "오른쪽 무릎",    sub: "knee",     style: { top: "72%",  right: "22%", width: "18%", height: "10%" } },
+  { id: "kn-l",      label: "왼쪽 무릎",      sub: "knee",     style: { top: "68%",  left: "20%",  width: "20%", height: "11%" } },
+  { id: "kn-r",      label: "오른쪽 무릎",    sub: "knee",     style: { top: "68%",  right: "20%", width: "20%", height: "11%" } },
   { id: "ank-l",     label: "왼쪽 발목",      sub: "ankle",    style: { top: "87%",  left: "18%",  width: "18%", height: "9%"  } },
   { id: "ank-r",     label: "오른쪽 발목",    sub: "ankle",    style: { top: "87%",  right: "18%", width: "18%", height: "9%"  } },
 ];
@@ -167,8 +167,8 @@ const BACK_ZONES = [
   { id: "glute-r",   label: "오른쪽 골반",     sub: null,       style: { top: "51%",  right: "22%", width: "22%", height: "10%" } },
   { id: "ham-l",     label: "왼쪽 햄스트링",   sub: null,       style: { top: "61%",  left: "22%",  width: "20%", height: "12%" } },
   { id: "ham-r",     label: "오른쪽 햄스트링", sub: null,       style: { top: "61%",  right: "22%", width: "20%", height: "12%" } },
-  { id: "kn-bl",     label: "왼쪽 무릎 뒤",    sub: "knee",     style: { top: "72%",  left: "22%",  width: "18%", height: "10%" } },
-  { id: "kn-br",     label: "오른쪽 무릎 뒤",  sub: "knee",     style: { top: "72%",  right: "22%", width: "18%", height: "10%" } },
+  { id: "kn-bl",     label: "왼쪽 무릎 뒤",    sub: "knee",     style: { top: "68%",  left: "20%",  width: "20%", height: "11%" } },
+  { id: "kn-br",     label: "오른쪽 무릎 뒤",  sub: "knee",     style: { top: "68%",  right: "20%", width: "20%", height: "11%" } },
   { id: "cal-l",     label: "왼쪽 종아리",     sub: null,       style: { top: "82%",  left: "20%",  width: "18%", height: "10%" } },
   { id: "cal-r",     label: "오른쪽 종아리",   sub: null,       style: { top: "82%",  right: "20%", width: "18%", height: "10%" } },
 ];

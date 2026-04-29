@@ -109,6 +109,7 @@ export default function App() {
   const [moveOwnerOpen, setMoveOwnerOpen] = useState(false);
   const [moveOwnerTrainer, setMoveOwnerTrainer] = useState("");
   const [moveOwnerFolder, setMoveOwnerFolder] = useState("");
+  const [adminMode, setAdminMode] = useState(() => localStorage.getItem("mlAdminMode") === "1");
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
   const [addForm, setAddForm] = useState(null);
@@ -242,12 +243,12 @@ export default function App() {
 
   const isAdmin = currentUser?.isAdmin || false;
 
-  // 관리자는 모든 폴더, 트레이너는 본인 폴더만
-  const currentFolders = isAdmin
+  // 관리자 모드 ON일 때만 모든 폴더, 평소엔 본인 폴더
+  const currentFolders = (isAdmin && adminMode)
     ? users.flatMap(u => u.folders || []).filter((f, i, arr) => arr.findIndex(x => x.key === f.key) === i)
     : (currentUser?.folders || []);
 
-  const folderCount = (key) => members.filter(m => m.folder === key && (isAdmin || !m.owner || m.owner === currentUser?.id)).length;
+  const folderCount = (key) => members.filter(m => m.folder === key && ((isAdmin && adminMode) || !m.owner || m.owner === currentUser?.id)).length;
 
   // 변동사항 감지 — 회원별 마지막 확인 시각 기준 (카톡 방식)
   const getChangeBadge = (m) => {
@@ -281,7 +282,7 @@ export default function App() {
   };
 
   const filtered = members
-    .filter(m => m.folder === folder && (isAdmin || !m.owner || m.owner === currentUser?.id) &&
+    .filter(m => m.folder === folder && ((isAdmin && adminMode) || !m.owner || m.owner === currentUser?.id) &&
       (m.name.includes(search) || (m.purpose || []).some(p => p.includes(search))))
     .sort(koreanSort);
 
@@ -760,7 +761,20 @@ export default function App() {
           </div>
           <div>
             <div style={{ fontSize: 14, fontWeight: 700 }}>{currentUser?.name}</div>
-            {isAdmin && <div style={{ fontSize: 11, color: "#F9CA24", marginTop: 2 }}>관리자</div>}
+            {isAdmin && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                <span style={{ fontSize: 11, color: "#F9CA24" }}>관리자</span>
+                <button onClick={(e) => {
+                  e.stopPropagation();
+                  const next = !adminMode;
+                  setAdminMode(next);
+                  localStorage.setItem("mlAdminMode", next ? "1" : "0");
+                }}
+                  style={{ background: adminMode ? "#F9CA24" : "#1A1D27", border: "1px solid " + (adminMode ? "#F9CA24" : "#2A2D3E"), color: adminMode ? "#0F1117" : "#888", borderRadius: 100, padding: "2px 10px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
+                  {adminMode ? "✓ 모드 ON" : "모드 OFF"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
         {/* 메뉴 항목 */}
@@ -1248,8 +1262,8 @@ export default function App() {
               📄 회원 보고서 만들기
             </button>
 
-            {/* 트레이너 이동 (관리자만) */}
-            {isAdmin && (
+            {/* 트레이너 이동 (관리자 모드 ON일 때만) */}
+            {isAdmin && adminMode && (
               <button onClick={openMoveOwner}
                 style={{ width: "100%", background: "#1A1D27", border: "1px solid #F9CA24", borderRadius: 12, padding: "12px", color: "#F9CA24", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 20 }}>
                 👥 다른 트레이너로 이동

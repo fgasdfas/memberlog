@@ -205,11 +205,11 @@ export default function Report() {
   };
 
   return (
-    <div style={{ background: "#1a1a1f", minHeight: "100vh", padding: "40px 20px", display: "flex", justifyContent: "center", color: "#1a1a1f" }}>
+    <div style={{ background: "#1a1a1f", minHeight: "100vh", padding: "20px 16px 40px", display: "flex", flexDirection: "column", alignItems: "center", color: "#1a1a1f" }}>
       <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
 
       {/* 툴바 */}
-      <div style={{ position: "fixed", top: 20, right: 20, display: "flex", gap: 8, zIndex: 10 }} className="no-print">
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, zIndex: 10 }} className="no-print">
         <button onClick={() => window.print()}
           style={{ background: "#4ECDC4", color: "#0F1117", border: "none", padding: "10px 18px", borderRadius: 8, fontWeight: 700, fontFamily: "'Noto Sans KR', sans-serif", cursor: "pointer", fontSize: 13 }}>
           PDF로 저장
@@ -241,15 +241,45 @@ export default function Report() {
             height: 297mm !important;
             min-height: 297mm !important;
             max-height: 297mm !important;
-            padding: 12mm 14mm 10mm !important;
+            padding: 8mm 10mm 7mm !important;
             overflow: hidden !important;
             page-break-after: avoid !important;
             page-break-inside: avoid !important;
+            transform: scale(0.97) !important;
+            transform-origin: top left !important;
+          }
+          #report-wrapper {
+            transform: none !important;
+            height: auto !important;
+            width: 210mm !important;
+          }
+        }
+        @media screen and (max-width: 820px) {
+          #report-wrapper {
+            transform: scale(var(--scale, 1));
+            transform-origin: top center;
           }
         }
       `}</style>
 
+      <script dangerouslySetInnerHTML={{ __html: `
+        (function() {
+          function fit() {
+            var w = document.getElementById('report-wrapper');
+            if (!w) return;
+            var avail = window.innerWidth - 32;
+            var scale = Math.min(1, avail / 794);
+            w.style.setProperty('--scale', scale);
+            w.style.height = (1123 * scale) + 'px';
+          }
+          window.addEventListener('load', fit);
+          window.addEventListener('resize', fit);
+          setTimeout(fit, 50);
+        })();
+      `}} />
+
       {/* A4 보고서 */}
+      <div id="report-wrapper" style={{ width: 794 }}>
       <div id="report-a4" style={{
         width: 794, minHeight: 1123, background: "#fafaf7", padding: "36px 40px 32px",
         boxShadow: "0 30px 80px rgba(0,0,0,0.5)", position: "relative", overflow: "hidden",
@@ -412,6 +442,7 @@ export default function Report() {
           <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 11, color: "#0F1117", fontWeight: 700 }}>— 01 —</span>
           <span>memberlog.web.app</span>
         </div>
+      </div>
       </div>
     </div>
   );

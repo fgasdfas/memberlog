@@ -72,7 +72,7 @@ const generateComment = (member, inbody, period) => {
 export default function Report() {
   const { memberId } = useParams();
   const [member, setMember] = useState(null);
-  const [trainerName, setTrainerName] = useState("박광덕");
+  const [trainerName] = useState("박광덕");
   const [folderName, setFolderName] = useState("");
   const [comment, setComment] = useState("");
   const [editingComment, setEditingComment] = useState(false);
@@ -86,13 +86,12 @@ export default function Report() {
         const m = { id: snap.id, ...snap.data() };
         setMember(m);
 
-        // 트레이너 정보 + 폴더 라벨
+        // 폴더 라벨
         if (m.owner) {
           try {
             const userSnap = await getDoc(doc(db, "users", m.owner));
             if (userSnap.exists()) {
               const u = userSnap.data();
-              setTrainerName(u.name || "박광덕");
               const f = (u.folders || []).find(x => x.key === m.folder);
               setFolderName(f?.label || "");
             }
@@ -215,7 +214,7 @@ export default function Report() {
           </div>
           <div>
             <div style={{ fontSize: 9, color: "#888", letterSpacing: 2, marginBottom: 6, fontWeight: 500 }}>AGE</div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#fafaf7" }}>{member.age ? `${member.age}세` : "-"}</div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "#fafaf7" }}>{member.age || "-"}</div>
           </div>
           <div>
             <div style={{ fontSize: 9, color: "#888", letterSpacing: 2, marginBottom: 6, fontWeight: 500 }}>GENDER</div>

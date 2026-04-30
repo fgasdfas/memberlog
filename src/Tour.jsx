@@ -273,18 +273,27 @@ export default function Tour() {
                 이전
               </button>
             )}
-            {step < totalSteps - 1 ? (
+            {step < totalSteps - 1 && (
               <button onClick={() => setStep(step + 1)}
                 style={{ flex: 1, background: "#4ECDC4", border: "none", color: "#0F1117", padding: 10, borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: font }}>
                 다음 →
               </button>
-            ) : (
-              <button onClick={() => navigate("/")}
-                style={{ flex: 1, background: "#4ECDC4", border: "none", color: "#0F1117", padding: 10, borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: font }}>
-                로그인 →
-              </button>
             )}
           </div>
+
+          {/* 마지막 단계: CTA 두 버튼 */}
+          {step === totalSteps - 1 && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: "0 20px 16px" }}>
+              <button onClick={() => window.open("https://open.kakao.com/o/szxBzqsi", "_blank")}
+                style={{ background: "#FEE500", border: "none", color: "#3C1E1E", padding: "12px 10px", borderRadius: 8, fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: font, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                💬 카톡 문의
+              </button>
+              <button onClick={() => window.open("https://www.instagram.com/forma_trainer", "_blank")}
+                style={{ background: "linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)", border: "none", color: "white", padding: "12px 10px", borderRadius: 8, fontSize: 13, fontWeight: 800, cursor: "pointer", fontFamily: font, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                📷 인스타
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 하단 카카오톡 */}

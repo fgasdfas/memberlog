@@ -6,7 +6,7 @@ const font = "'Noto Sans KR', sans-serif";
 export default function Tour() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const steps = [
     {
@@ -59,67 +59,146 @@ export default function Tour() {
       )
     },
     {
-      num: "04", title: "이런 보고서를 1초에 생성",
-      desc: "실제로 만들어지는 A4 보고서 예시예요. PDF·이미지로 출력 가능.",
+      num: "04", title: "A4 보고서 1초 생성",
+      desc: "PT 성과를 한 장으로 깔끔하게 정리. PDF·이미지로 출력 가능.",
       content: (
-        <div style={{ background: "#fafaf7", color: "#1a1a1f", borderRadius: 6, padding: "16px 14px", boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-            <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 900, letterSpacing: 1 }}>FORMA</div>
-              <div style={{ fontSize: 7, letterSpacing: 1, color: "#888" }}>PERSONAL TRAINING REPORT</div>
+        <div style={{ background: "linear-gradient(135deg, #4ECDC415 0%, #15182100 100%)", border: "1px solid #4ECDC444", borderRadius: 10, padding: "24px 16px", textAlign: "center" }}>
+          <div style={{ fontSize: 36, marginBottom: 8 }}>📄</div>
+          <h4 style={{ fontSize: 15, fontWeight: 800, color: "#E8E8E8", marginBottom: 8 }}>이런 보고서가 만들어져요</h4>
+          <p style={{ fontSize: 12, color: "#888", lineHeight: 1.7 }}>인바디 변화·세션 기록·PT 성과를<br/>자동으로 정리해 A4 1페이지에 담아드려요</p>
+          <div style={{ display: "flex", justifyContent: "space-around", marginTop: 16, paddingTop: 16, borderTop: "1px solid #4ECDC433" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 900, color: "#4ECDC4" }}>1초</div>
+              <div style={{ fontSize: 9, color: "#888", marginTop: 2 }}>생성 속도</div>
             </div>
-            <div style={{ textAlign: "right", fontSize: 8, color: "#444", lineHeight: 1.5 }}>
-              발행일 <strong style={{ color: "#1a1a1f", fontWeight: 700 }}>2026.04.30</strong><br/>
-              담당 <strong style={{ color: "#1a1a1f", fontWeight: 700 }}>오리코치</strong>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 900, color: "#4ECDC4" }}>A4</div>
+              <div style={{ fontSize: 9, color: "#888", marginTop: 2 }}>1페이지</div>
             </div>
-          </div>
-          <hr style={{ border: "none", borderTop: "1px solid #1a1a1f", margin: "4px 0 10px" }} />
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 900, lineHeight: 1.1, marginBottom: 2 }}>Member Progress Report</div>
-          <div style={{ fontSize: 9, color: "#888", marginBottom: 10 }}>회원 성과 분석 보고서</div>
-          <div style={{ background: "#0F1117", color: "white", padding: "8px 10px", borderRadius: 4, borderLeft: "3px solid #4ECDC4", marginBottom: 12, display: "flex", gap: 18 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 7, color: "#888", letterSpacing: 1 }}>NAME</div>
-              <div style={{ fontSize: 11, fontWeight: 800 }}>이지은</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 7, color: "#888", letterSpacing: 1 }}>AGE</div>
-              <div style={{ fontSize: 11, fontWeight: 800 }}>30대</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 7, color: "#888", letterSpacing: 1 }}>PERIOD</div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#4ECDC4" }}>8주</div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 900, color: "#4ECDC4" }}>PDF</div>
+              <div style={{ fontSize: 9, color: "#888", marginTop: 2 }}>출력 가능</div>
             </div>
           </div>
-          <div style={{ marginBottom: 10 }}>
-            <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 900, color: "#4ECDC4", marginRight: 6 }}>02</span>
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>KEY METRICS</span>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, paddingLeft: 16, marginTop: 4 }}>
-              <div style={{ background: "white", border: "1px solid #e5e3de", padding: "4px 6px", borderRadius: 3 }}>
-                <div style={{ fontSize: 6, color: "#888" }}>체중</div>
-                <div style={{ fontSize: 8, fontWeight: 700 }}>62.3</div>
-                <div style={{ fontSize: 8, color: "#4ECDC4", fontWeight: 700 }}>↓ 2.3</div>
+        </div>
+      )
+    },
+    {
+      num: "05", title: "실제 보고서 예시",
+      desc: "아래 보고서가 실제로 1초만에 만들어져요. ↓",
+      content: (
+        <div style={{ background: "#fafaf7", color: "#1a1a1f", borderRadius: 4, boxShadow: "0 8px 32px rgba(0,0,0,0.5)", overflow: "hidden" }}>
+          <div style={{ padding: "20px 18px 16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+              <div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 900, letterSpacing: 2, lineHeight: 1 }}>FORMA</div>
+                <div style={{ fontSize: 8, letterSpacing: 1.5, color: "#888", marginTop: 2 }}>PERSONAL TRAINING REPORT</div>
               </div>
-              <div style={{ background: "white", border: "1px solid #e5e3de", padding: "4px 6px", borderRadius: 3 }}>
-                <div style={{ fontSize: 6, color: "#888" }}>골격근</div>
-                <div style={{ fontSize: 8, fontWeight: 700 }}>24.5</div>
-                <div style={{ fontSize: 8, color: "#4ECDC4", fontWeight: 700 }}>↑ 0.8</div>
+              <div style={{ textAlign: "right", fontSize: 9, color: "#444", lineHeight: 1.6 }}>
+                발행일 <strong style={{ color: "#1a1a1f", fontWeight: 700 }}>2026.04.30</strong><br/>
+                담당 <strong style={{ color: "#1a1a1f", fontWeight: 700 }}>오리코치</strong><br/>
+                소속 <strong style={{ color: "#1a1a1f", fontWeight: 700 }}>롯데대연</strong>
               </div>
-              <div style={{ background: "white", border: "1px solid #e5e3de", padding: "4px 6px", borderRadius: 3 }}>
-                <div style={{ fontSize: 6, color: "#888" }}>체지방</div>
-                <div style={{ fontSize: 8, fontWeight: 700 }}>26.4%</div>
-                <div style={{ fontSize: 8, color: "#4ECDC4", fontWeight: 700 }}>↓ 3.1</div>
+            </div>
+            <hr style={{ border: "none", borderTop: "1px solid #1a1a1f", margin: "8px 0 14px" }} />
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 900, lineHeight: 1.05, marginBottom: 4 }}>Member Progress Report</div>
+            <div style={{ fontSize: 11, color: "#888", marginBottom: 14 }}>회원 성과 분석 보고서</div>
+
+            <div style={{ background: "#0F1117", color: "white", padding: "12px 14px", borderRadius: 4, borderLeft: "3px solid #4ECDC4", display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 8, color: "#888", letterSpacing: 1.5, marginBottom: 3 }}>NAME</div>
+                <div style={{ fontSize: 13, fontWeight: 800 }}>이지은</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 8, color: "#888", letterSpacing: 1.5, marginBottom: 3 }}>AGE</div>
+                <div style={{ fontSize: 13, fontWeight: 800 }}>30대</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 8, color: "#888", letterSpacing: 1.5, marginBottom: 3 }}>GENDER</div>
+                <div style={{ fontSize: 13, fontWeight: 800 }}>여성</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 8, color: "#888", letterSpacing: 1.5, marginBottom: 3 }}>PERIOD</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#4ECDC4" }}>8주</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 900, color: "#4ECDC4" }}>01</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5 }}>BODY COMPOSITION CHANGE</span>
+              </div>
+              <div style={{ paddingLeft: 20 }}>
+                <div style={{ background: "white", border: "1px solid #e5e3de", borderRadius: 4, height: 70, padding: 8 }}>
+                  <svg width="100%" height="54" viewBox="0 0 380 54">
+                    <line x1="0" y1="14" x2="380" y2="14" stroke="#e5e3de" strokeDasharray="2,2"/>
+                    <line x1="0" y1="28" x2="380" y2="28" stroke="#e5e3de" strokeDasharray="2,2"/>
+                    <line x1="0" y1="42" x2="380" y2="42" stroke="#e5e3de" strokeDasharray="2,2"/>
+                    <polyline points="20,18 90,22 160,32 230,38 300,44 360,46" fill="none" stroke="#4ECDC4" strokeWidth="2" />
+                    <circle cx="20" cy="18" r="3" fill="#4ECDC4" />
+                    <circle cx="90" cy="22" r="3" fill="#4ECDC4" />
+                    <circle cx="160" cy="32" r="3" fill="#4ECDC4" />
+                    <circle cx="230" cy="38" r="3" fill="#4ECDC4" />
+                    <circle cx="300" cy="44" r="3" fill="#4ECDC4" />
+                    <circle cx="360" cy="46" r="3" fill="#4ECDC4" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 900, color: "#4ECDC4" }}>02</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5 }}>KEY METRICS</span>
+              </div>
+              <div style={{ paddingLeft: 20, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 5 }}>
+                {[
+                  { l: "체중", v: "62.3kg", c: "↓ 2.3kg" },
+                  { l: "골격근량", v: "24.5kg", c: "↑ 0.8kg" },
+                  { l: "체지방률", v: "26.4%", c: "↓ 3.1%p" },
+                  { l: "체지방량", v: "16.4kg", c: "↓ 2.8kg" },
+                ].map((m, i) => (
+                  <div key={i} style={{ background: "white", border: "1px solid #e5e3de", padding: "6px 8px", borderRadius: 3 }}>
+                    <div style={{ fontSize: 7, color: "#888" }}>{m.l}</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, marginTop: 2 }}>{m.v}</div>
+                    <div style={{ fontSize: 8, color: "#4ECDC4", fontWeight: 700 }}>{m.c}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 900, color: "#4ECDC4" }}>03</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5 }}>SESSION HIGHLIGHTS</span>
+              </div>
+              <div style={{ paddingLeft: 20, fontSize: 10, lineHeight: 1.7, color: "#444" }}>
+                <span style={{ display: "inline-block", background: "#4ECDC422", color: "#4ECDC4", padding: "1px 6px", borderRadius: 3, fontSize: 8, fontWeight: 700, marginRight: 6 }}>04.20</span>자세 교정 + 코어 운동 진행, 가동범위 개선<br/>
+                <span style={{ display: "inline-block", background: "#4ECDC422", color: "#4ECDC4", padding: "1px 6px", borderRadius: 3, fontSize: 8, fontWeight: 700, marginRight: 6 }}>04.25</span>체중 감량 추세 양호, 식단 조절 유지
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 4 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 900, color: "#4ECDC4" }}>04</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5 }}>TRAINER'S NOTE</span>
+              </div>
+              <div style={{ paddingLeft: 20 }}>
+                <div style={{ background: "#0F1117", color: "#fafaf7", padding: "10px 12px", borderRadius: 3, fontSize: 10, lineHeight: 1.6 }}>
+                  8주간 이지은님과 "다이어트, 근력강화"를 목표로 함께해 왔습니다. 체지방률 3.1%p 감량과 골격근 0.8kg 증가를 이뤄내셨습니다. 그 과정에서 자세 교정, 식단 관리, 코어 강화를 중점적으로 진행했습니다.
+                </div>
               </div>
             </div>
           </div>
-          <div style={{ borderTop: "1px solid #1a1a1f", marginTop: 10, paddingTop: 6, display: "flex", justifyContent: "space-between", fontSize: 7, color: "#888" }}>
-            <span><strong style={{ color: "#4ECDC4", fontFamily: "'Playfair Display', serif" }}>FORMA</strong> · PERSONAL TRAINING</span>
+          <div style={{ background: "#0F1117", color: "white", padding: "10px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 9 }}>
+            <span><strong style={{ color: "#4ECDC4", fontFamily: "'Playfair Display', serif", letterSpacing: 1.5 }}>FORMA</strong> · PERSONAL TRAINING</span>
             <span>memberlog.web.app</span>
           </div>
         </div>
       )
     },
     {
-      num: "05", title: "새 기록 들어오면 알림",
+      num: "06", title: "새 기록 들어오면 알림",
       desc: "회원이 인바디·설문을 입력하면 회원 카드에 NEW 표시.",
       content: (
         <div style={{ background: "#0F1117", borderRadius: 10, border: "1px solid #2A2D3E", padding: "14px 12px" }}>
@@ -132,7 +211,7 @@ export default function Tour() {
       )
     },
     {
-      num: "06", title: "트레이너별 회원 분리",
+      num: "07", title: "트레이너별 회원 분리",
       desc: "여러 트레이너가 함께 써도 본인 회원만 보여요. 폴더로도 정리 가능.",
       content: (
         <div style={{ background: "#0F1117", borderRadius: 10, border: "1px solid #2A2D3E", padding: "14px 12px" }}>
@@ -145,7 +224,7 @@ export default function Tour() {
       )
     },
     {
-      num: "07", title: "시작해볼까요?",
+      num: "08", title: "시작해볼까요?",
       desc: "베타 기간 동안 무료. 카카오톡으로 문의주시면 계정 만들어드립니다.",
       content: (
         <div style={{ padding: 18, textAlign: "center", background: "linear-gradient(135deg, #4ECDC4 0%, #44A39C 100%)", borderRadius: 10, color: "#0F1117" }}>

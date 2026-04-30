@@ -1685,9 +1685,31 @@ export default function App() {
                 </div>
                 {inbodyData.length > 0 && (
                   <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "16px", marginBottom: 20 }}>
-                    <p style={{ margin: "0 0 12px", fontSize: 13, color: "#888" }}>📈 변화 추이</p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+                      <p style={{ margin: 0, fontSize: 13, color: "#888" }}>📈 변화 추이</p>
+                      {(() => {
+                        const last = inbodyData[inbodyData.length - 1];
+                        if (!last) return null;
+                        return (
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {last.체중 != null && (
+                              <span style={{ background: "#0F1117", border: "1px solid #4ECDC444", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#4ECDC4" }}>{last.체중}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span></span>
+                            )}
+                            {last.골격근량 != null && (
+                              <span style={{ background: "#0F1117", border: "1px solid #6BCB7744", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#6BCB77" }}>{last.골격근량}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span></span>
+                            )}
+                            {last.체지방률 != null && (
+                              <span style={{ background: "#0F1117", border: "1px solid #FF6B6B44", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#FF6B6B" }}>{last.체지방률}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>%</span></span>
+                            )}
+                            {last.체지방량 != null && (
+                              <span style={{ background: "#0F1117", border: "1px solid #FFA50044", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#FFA500" }}>{last.체지방량}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span></span>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
                     <ResponsiveContainer width="100%" height={200}>
-                      <LineChart data={inbodyData}>
+                      <LineChart data={inbodyData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                         <XAxis dataKey="date" stroke="#555" tick={{ fontSize: 10, fill: "#666" }} />
                         <YAxis stroke="#555" tick={{ fontSize: 10, fill: "#666" }} width={30} />
                         <Tooltip contentStyle={{ background: "#1A1D27", border: "1px solid #2A2D3E", borderRadius: 8, color: "#E8E8E8", fontSize: 11 }} />
@@ -1718,7 +1740,7 @@ export default function App() {
                   <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "16px", marginBottom: 20 }}>
                     <p style={{ margin: "0 0 12px", fontSize: 13, color: "#F9CA24" }}>🌟 컨디션 변화</p>
                     <ResponsiveContainer width="100%" height={140}>
-                      <LineChart data={inbodyData}>
+                      <LineChart data={inbodyData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                         <XAxis dataKey="date" stroke="#555" tick={{ fontSize: 10, fill: "#666" }} />
                         <YAxis stroke="#555" tick={{ fontSize: 10, fill: "#666" }} width={30} domain={[0, 6]} ticks={[1,2,3,4,5]}
                           tickFormatter={v => ["","😴","😐","🙂","😊","💪"][v] || ""} />

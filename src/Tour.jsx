@@ -296,16 +296,6 @@ export default function Tour() {
           )}
         </div>
 
-        {/* 하단 카카오톡 */}
-        <div style={{ textAlign: "center", marginTop: 24 }}>
-          <button onClick={() => window.open("https://open.kakao.com/o/szxBzqsi", "_blank")}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#FEE500", border: "none", borderRadius: 12, padding: "12px 24px", cursor: "pointer", fontFamily: font }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#3C1E1E">
-              <path d="M12 2C6.477 2 2 5.8 2 10.5c0 3.016 1.86 5.662 4.67 7.19L5.5 22l4.73-2.52C10.78 19.65 11.38 19.7 12 19.7c5.523 0 10-3.8 10-8.5S17.523 2 12 2z"/>
-            </svg>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#3C1E1E" }}>문의하기</span>
-          </button>
-        </div>
       </div>
     </div>
   );

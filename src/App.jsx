@@ -89,6 +89,9 @@ export default function App() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState(false);
+  const [directNameInput, setDirectNameInput] = useState("");
+  const [directPwInput, setDirectPwInput] = useState("");
+  const [showDirectLogin, setShowDirectLogin] = useState(false);
 
   const [members, setMembers] = useState([]);
   const [submittedSurveys, setSubmittedSurveys] = useState(new Set());
@@ -587,43 +590,37 @@ export default function App() {
         </div>
       </div>
       <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 20, padding: "32px", maxWidth: 320, width: "100%" }}>
-        {loginStep === "select" ? (
-          <>
-            <p style={{ color: "#888", fontSize: 14, marginBottom: 20, fontFamily: "'Noto Sans KR', sans-serif", textAlign: "center" }}>계정을 선택해주세요</p>
-            {users.map(user => (
-              <button key={user.id} onClick={() => handleSelectUser(user)}
-                style={{ width: "100%", background: "#0F1117", border: "1px solid #2A2D3E", borderRadius: 12, padding: "16px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer", marginBottom: 10, fontFamily: "'Noto Sans KR', sans-serif" }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#4ECDC4"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#2A2D3E"}>
-                <span style={{ fontSize: 28 }}>{user.emoji}</span>
-                <div style={{ textAlign: "left" }}>
-                  <div style={{ color: "#E8E8E8", fontWeight: 700, fontSize: 15 }}>{user.name}</div>
-                  <div style={{ color: "#555", fontSize: 12, marginTop: 2 }}>폴더 {(user.folders || []).length}개</div>
-                </div>
-                <span style={{ marginLeft: "auto", color: "#444", fontSize: 18 }}>›</span>
-              </button>
-            ))}
-          </>
-        ) : (
-          <>
-            <button onClick={() => setLoginStep("select")} style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: 14, marginBottom: 16, fontFamily: "'Noto Sans KR', sans-serif", padding: 0 }}>← 돌아가기</button>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <div style={{ fontSize: 40, marginBottom: 8 }}>{users.find(u => u.id === selectedUserId)?.emoji}</div>
-              <div style={{ color: "#E8E8E8", fontWeight: 700, fontSize: 18, fontFamily: "'Noto Sans KR', sans-serif" }}>{selectedUserId}</div>
-              <div style={{ color: "#555", fontSize: 13, marginTop: 4, fontFamily: "'Noto Sans KR', sans-serif" }}>비밀번호를 입력해주세요</div>
-            </div>
-            <input type="password" value={pwInput}
-              onChange={e => { setPwInput(e.target.value); setPwError(false); }}
-              onKeyDown={e => e.key === "Enter" && handleLogin()}
-              placeholder="비밀번호 입력"
-              style={{ ...inputStyle, marginBottom: 12, textAlign: "center", fontSize: 16 }} />
-            {pwError && <p style={{ color: "#FF6B6B", fontSize: 13, marginBottom: 12, fontFamily: "'Noto Sans KR', sans-serif", textAlign: "center" }}>비밀번호가 틀렸어요</p>}
-            <button onClick={handleLogin}
-              style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 12, padding: "14px", fontWeight: 700, fontSize: 15, color: "#0F1117", cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif" }}>
-              입장하기
-            </button>
-          </>
-        )}
+        <input type="text" value={directNameInput}
+          onChange={e => { setDirectNameInput(e.target.value); setPwError(false); }}
+          placeholder="트레이너 이름"
+          style={{ ...inputStyle, marginBottom: 10 }} />
+        <input type="password" value={directPwInput}
+          onChange={e => { setDirectPwInput(e.target.value); setPwError(false); }}
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              const user = users.find(u => u.id === directNameInput.trim() || u.name === directNameInput.trim());
+              if (user && directPwInput === user.password) {
+                setCurrentUser(user); sessionStorage.setItem("mlUser", JSON.stringify(user)); localStorage.removeItem("inbodyMemberId");
+              } else { setPwError(true); }
+            }
+          }}
+          placeholder="비밀번호"
+          style={{ ...inputStyle, marginBottom: 10 }} />
+        {pwError && <p style={{ color: "#FF6B6B", fontSize: 13, marginBottom: 12, fontFamily: "'Noto Sans KR', sans-serif", textAlign: "center" }}>이름 또는 비밀번호가 틀렸어요</p>}
+        <button onClick={() => {
+          const user = users.find(u => u.id === directNameInput.trim() || u.name === directNameInput.trim());
+          if (user && directPwInput === user.password) {
+            setCurrentUser(user); sessionStorage.setItem("mlUser", JSON.stringify(user)); localStorage.removeItem("inbodyMemberId");
+          } else { setPwError(true); }
+        }}
+          style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 12, padding: "14px", fontWeight: 700, fontSize: 15, color: "#0F1117", cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 12 }}>
+          로그인
+        </button>
+        <button onClick={() => window.location.href = "/#/tour"}
+          style={{ width: "100%", background: "transparent", border: "1px solid #4ECDC4", borderRadius: 12, padding: "13px", color: "#4ECDC4", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          👀 기능 둘러보기
+        </button>
+        <p style={{ fontSize: 11, color: "#555", textAlign: "center", marginTop: 14, fontFamily: "'Noto Sans KR', sans-serif" }}>처음이세요? 카카오톡으로 문의주세요</p>
       </div>
       {/* 카카오톡 문의 버튼 */}
       <button onClick={() => window.open("https://open.kakao.com/o/szxBzqsi", "_blank")}

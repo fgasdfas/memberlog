@@ -8,6 +8,7 @@ import SurveyView from './SurveyView.jsx'
 import Guide from './Guide.jsx'
 import Diet from './Diet.jsx'
 import Report from './Report.jsx'
+import Tour from './Tour.jsx'
 
 // 저장된 회원 ID로 자동 리다이렉트
 function InbodyRedirect() {
@@ -33,6 +34,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/guide/:type" element={<Guide />} />
         <Route path="/diet" element={<Diet />} />
         <Route path="/report/:memberId" element={<Report />} />
+        <Route path="/tour" element={<Tour />} />
       </Routes>
     </HashRouter>
   </React.StrictMode>,

@@ -381,9 +381,18 @@ export default function Inbody() {
 
                 {/* 체중 그래프 */}
                 <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: "16px", marginBottom: 14 }}>
-                  <p style={{ fontSize: 12, color: "#4ECDC4", fontWeight: 700, marginBottom: 14 }}>⚖️ 체중 변화</p>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <p style={{ fontSize: 12, color: "#4ECDC4", fontWeight: 700 }}>⚖️ 체중 변화</p>
+                    {inbodyData.length > 0 && inbodyData[inbodyData.length - 1].weight !== null && inbodyData[inbodyData.length - 1].weight !== undefined && (
+                      <div style={{ background: "#0F1117", border: "1px solid #4ECDC444", borderRadius: 8, padding: "4px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ fontSize: 10, color: "#888" }}>최신</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: "#4ECDC4" }}>{inbodyData[inbodyData.length - 1].weight}</span>
+                        <span style={{ fontSize: 10, color: "#888" }}>kg</span>
+                      </div>
+                    )}
+                  </div>
                   <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={chartData}>
+                    <LineChart data={chartData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                       <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#555" }} />
                       <YAxis tick={{ fontSize: 10, fill: "#555" }} domain={["auto", "auto"]} />
                       <Tooltip content={<CustomTooltip />} />
@@ -394,9 +403,27 @@ export default function Inbody() {
 
                 {/* 골격근량 + 체지방률 그래프 */}
                 <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: "16px", marginBottom: 14 }}>
-                  <p style={{ fontSize: 12, color: "#6BCB77", fontWeight: 700, marginBottom: 14 }}>💪 골격근량 · 체지방률 변화</p>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 6 }}>
+                    <p style={{ fontSize: 12, color: "#6BCB77", fontWeight: 700 }}>💪 골격근량 · 체지방률 변화</p>
+                    {inbodyData.length > 0 && (
+                      <div style={{ display: "flex", gap: 6 }}>
+                        {inbodyData[inbodyData.length - 1].muscle !== null && inbodyData[inbodyData.length - 1].muscle !== undefined && (
+                          <div style={{ background: "#0F1117", border: "1px solid #6BCB7744", borderRadius: 8, padding: "4px 8px", display: "flex", alignItems: "center", gap: 4 }}>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: "#6BCB77" }}>{inbodyData[inbodyData.length - 1].muscle}</span>
+                            <span style={{ fontSize: 9, color: "#888" }}>kg</span>
+                          </div>
+                        )}
+                        {inbodyData[inbodyData.length - 1].fat !== null && inbodyData[inbodyData.length - 1].fat !== undefined && (
+                          <div style={{ background: "#0F1117", border: "1px solid #FF6B6B44", borderRadius: 8, padding: "4px 8px", display: "flex", alignItems: "center", gap: 4 }}>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: "#FF6B6B" }}>{inbodyData[inbodyData.length - 1].fat}</span>
+                            <span style={{ fontSize: 9, color: "#888" }}>%</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={chartData}>
+                    <LineChart data={chartData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                       <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#555" }} />
                       <YAxis tick={{ fontSize: 10, fill: "#555" }} domain={["auto", "auto"]} />
                       <Tooltip content={<CustomTooltip />} />
@@ -412,7 +439,7 @@ export default function Inbody() {
                   <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 14, padding: "16px", marginBottom: 14 }}>
                     <p style={{ fontSize: 12, color: "#F9CA24", fontWeight: 700, marginBottom: 14 }}>🌟 컨디션 변화</p>
                     <ResponsiveContainer width="100%" height={140}>
-                      <LineChart data={chartData}>
+                      <LineChart data={chartData} margin={{ top: 10, right: 24, left: 0, bottom: 0 }}>
                         <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#555" }} />
                         <YAxis tick={{ fontSize: 10, fill: "#555" }} domain={[0, 6]} ticks={[1,2,3,4,5]}
                           tickFormatter={v => ["","😴","😐","🙂","😊","💪"][v] || ""} />

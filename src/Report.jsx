@@ -119,9 +119,21 @@ const generateComment = (member, inbody, period) => {
 export default function Report() {
   const { memberId } = useParams();
   const [member, setMember] = useState(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const fit = () => {
+      const avail = window.innerWidth - 32;
+      const newScale = Math.min(1, avail / 794);
+      setScale(newScale);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
   const [trainerName, setTrainerName] = useState(() => {
     try {
-      const u = JSON.parse(sessionStorage.getItem("mlUser") || "{}");
+      const u = JSON.parse(localStorage.getItem("mlUser") || "{}");
       return u.name || "박광덕";
     } catch (e) { return "박광덕"; }
   });
@@ -230,10 +242,23 @@ export default function Report() {
             background: white !important;
             margin: 0 !important;
             padding: 0 !important;
-            width: 210mm;
-            height: 297mm;
+            width: 210mm !important;
+            height: 297mm !important;
+            overflow: hidden !important;
           }
+          body * { visibility: hidden; }
+          #report-wrapper, #report-wrapper * { visibility: visible !important; }
           .no-print { display: none !important; }
+          #report-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            transform: none !important;
+            height: 297mm !important;
+            width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
           #report-a4 {
             box-shadow: none !important;
             margin: 0 !important;
@@ -248,38 +273,16 @@ export default function Report() {
             transform: scale(0.97) !important;
             transform-origin: top left !important;
           }
-          #report-wrapper {
-            transform: none !important;
-            height: auto !important;
-            width: 210mm !important;
-          }
-        }
-        @media screen and (max-width: 820px) {
-          #report-wrapper {
-            transform: scale(var(--scale, 1));
-            transform-origin: top center;
-          }
         }
       `}</style>
 
-      <script dangerouslySetInnerHTML={{ __html: `
-        (function() {
-          function fit() {
-            var w = document.getElementById('report-wrapper');
-            if (!w) return;
-            var avail = window.innerWidth - 32;
-            var scale = Math.min(1, avail / 794);
-            w.style.setProperty('--scale', scale);
-            w.style.height = (1123 * scale) + 'px';
-          }
-          window.addEventListener('load', fit);
-          window.addEventListener('resize', fit);
-          setTimeout(fit, 50);
-        })();
-      `}} />
-
       {/* A4 보고서 */}
-      <div id="report-wrapper" style={{ width: 794 }}>
+      <div id="report-wrapper" style={{
+        width: 794,
+        height: scale < 1 ? 1123 * scale : "auto",
+        transform: scale < 1 ? `scale(${scale})` : "none",
+        transformOrigin: "top center"
+      }}>
       <div id="report-a4" style={{
         width: 794, minHeight: 1123, background: "#fafaf7", padding: "36px 40px 32px",
         boxShadow: "0 30px 80px rgba(0,0,0,0.5)", position: "relative", overflow: "hidden",

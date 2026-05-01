@@ -81,7 +81,7 @@ const ADMIN_PASSWORD = "12142659";
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = sessionStorage.getItem("mlUser");
+    const saved = localStorage.getItem("mlUser");
     return saved ? JSON.parse(saved) : null;
   });
   const [users, setUsers] = useState([]);
@@ -220,7 +220,7 @@ export default function App() {
       }
       const newUser = { ...updated };
       setCurrentUser(newUser);
-      sessionStorage.setItem("mlUser", JSON.stringify(newUser));
+      localStorage.setItem("mlUser", JSON.stringify(newUser));
       if (!folder && updated.folders?.length > 0) {
         setFolder(updated.folders[0].key);
         setAddForm({ name: "", age: "", gender: "남성", purpose: [], registeredDate: today(), firstNote: "", folder: updated.folders[0].key });
@@ -237,7 +237,7 @@ export default function App() {
   const handleLogin = () => {
     const user = users.find(u => u.id === selectedUserId);
     if (user && pwInput === user.password) {
-      sessionStorage.setItem("mlUser", JSON.stringify(user));
+      localStorage.setItem("mlUser", JSON.stringify(user));
       // 로그인 시 인바디 리다이렉트 ID 삭제 (트레이너 폰에서 회원 페이지로 가는 문제 방지)
       localStorage.removeItem("inbodyMemberId");
       setCurrentUser(user);
@@ -252,7 +252,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("mlUser");
+    localStorage.removeItem("mlUser");
     setCurrentUser(null); setLoginStep("select");
     setSelectedUserId(null); setFolder(null);
     setMembers([]); setLoading(true); setView("list");
@@ -609,7 +609,7 @@ export default function App() {
             if (e.key === "Enter") {
               const user = users.find(u => u.id === directNameInput.trim() || u.name === directNameInput.trim());
               if (user && directPwInput === user.password) {
-                setCurrentUser(user); sessionStorage.setItem("mlUser", JSON.stringify(user)); localStorage.removeItem("inbodyMemberId");
+                setCurrentUser(user); localStorage.setItem("mlUser", JSON.stringify(user)); localStorage.removeItem("inbodyMemberId");
               } else { setPwError(true); }
             }
           }}
@@ -619,7 +619,7 @@ export default function App() {
         <button onClick={() => {
           const user = users.find(u => u.id === directNameInput.trim() || u.name === directNameInput.trim());
           if (user && directPwInput === user.password) {
-            setCurrentUser(user); sessionStorage.setItem("mlUser", JSON.stringify(user)); localStorage.removeItem("inbodyMemberId");
+            setCurrentUser(user); localStorage.setItem("mlUser", JSON.stringify(user)); localStorage.removeItem("inbodyMemberId");
           } else { setPwError(true); }
         }}
           style={{ width: "100%", background: "#4ECDC4", border: "none", borderRadius: 12, padding: "14px", fontWeight: 700, fontSize: 15, color: "#0F1117", cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", marginBottom: 12 }}>

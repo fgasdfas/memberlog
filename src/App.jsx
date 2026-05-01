@@ -1138,8 +1138,7 @@ export default function App() {
         {/* 목록 */}
         {view === "list" && (
           <div>
-            <div style={{ padding: "12px 16px 0", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "12px 16px 0" }}>
               <span style={{ fontSize: 20 }}>{currentUser.emoji}</span>
               <span style={{ color: "#4ECDC4", fontWeight: 700, fontSize: 15 }}>{currentUser.name}</span>
               <span style={{ color: "#555", fontSize: 13 }}>의 회원 관리</span>

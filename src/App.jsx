@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { initializeApp, getApps } from "firebase/app";
 import {
   getFirestore, collection, onSnapshot, addDoc, updateDoc,
@@ -125,6 +125,15 @@ export default function App() {
   const [editingInbodyIdx, setEditingInbodyIdx] = useState(null);
   const [editingInbodyForm, setEditingInbodyForm] = useState(null);
   const [activeTab, setActiveTab] = useState("record");
+  const inbodyGraphRef = useRef(null);
+
+  useEffect(() => {
+    if (activeTab === "inbody" && inbodyGraphRef.current) {
+      setTimeout(() => {
+        inbodyGraphRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [activeTab, selected?.id]);
   const [chartMetric, setChartMetric] = useState("weight"); // kept for compatibility
 
   const [survey, setSurvey] = useState(null);
@@ -1684,7 +1693,7 @@ export default function App() {
                   </button>
                 </div>
                 {inbodyData.length > 0 && (
-                  <div style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "16px", marginBottom: 20 }}>
+                  <div ref={inbodyGraphRef} style={{ background: "#151821", border: "1px solid #1E2133", borderRadius: 16, padding: "16px", marginBottom: 20, scrollMarginTop: 16 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
                       <p style={{ margin: 0, fontSize: 13, color: "#888" }}>📈 변화 추이</p>
                       {(() => {

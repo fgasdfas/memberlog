@@ -299,9 +299,23 @@ export default function App() {
   };
 
   const filtered = members
-    .filter(m => m.folder === folder && ((isAdmin && adminMode) || !m.owner || m.owner === currentUser?.id) &&
-      (m.name.includes(search) || (m.purpose || []).some(p => p.includes(search))))
-    .sort(koreanSort);
+    .filter(m => {
+      const isMine = (isAdmin && adminMode) || !m.owner || m.owner === currentUser?.id;
+      if (!isMine) return false;
+      // 알림 모아보기 가상 폴더
+      if (folder === "__alerts__") return !!getChangeBadge(m);
+      // 일반 폴더
+      return m.folder === folder;
+    })
+    .filter(m => m.name.includes(search) || (m.purpose || []).some(p => p.includes(search)))
+    .sort((a, b) => {
+      // 뱃지 있는 회원 (NEW / 설문·인바디 업데이트) 먼저 위로
+      const aHasBadge = !!getChangeBadge(a);
+      const bHasBadge = !!getChangeBadge(b);
+      if (aHasBadge !== bHasBadge) return aHasBadge ? -1 : 1;
+      // 그 다음 한국어 가나다 순
+      return koreanSort(a, b);
+    });
 
   const openDetail = (m) => {
     setSelected(m); setView("detail");
@@ -1125,10 +1139,27 @@ export default function App() {
         {view === "list" && (
           <div>
             <div style={{ padding: "12px 16px 0", display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 16px" }}>
               <span style={{ fontSize: 20 }}>{currentUser.emoji}</span>
               <span style={{ color: "#4ECDC4", fontWeight: 700, fontSize: 15 }}>{currentUser.name}</span>
               <span style={{ color: "#555", fontSize: 13 }}>의 회원 관리</span>
             </div>
+            {/* 알림 모아보기 버튼 — 알림 있는 회원이 1명 이상일 때만 노출 */}
+            {(() => {
+              const myMembers = members.filter(m => ((isAdmin && adminMode) || !m.owner || m.owner === currentUser?.id));
+              const alertCount = myMembers.filter(m => !!getChangeBadge(m)).length;
+              if (alertCount === 0) return null;
+              const isAlertView = folder === "__alerts__";
+              return (
+                <div style={{ margin: "12px 16px 0" }}>
+                  <button onClick={() => { setFolder(isAlertView ? currentFolders[0]?.key : "__alerts__"); setSearch(""); }}
+                    style={{ width: "100%", padding: "11px 14px", border: "1px solid " + (isAlertView ? "#FFE600" : "#FFE60055"), borderRadius: 12, cursor: "pointer", fontFamily: "'Noto Sans KR', sans-serif", fontWeight: 700, fontSize: 13, background: isAlertView ? "#FFE60022" : "#FFE6000A", color: isAlertView ? "#FFE600" : "#FFE600", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span>🔔 알림 모아보기</span>
+                    <span style={{ background: "#FFE600", color: "#0F1117", padding: "2px 8px", borderRadius: 10, fontSize: 12, fontWeight: 800 }}>{alertCount}</span>
+                  </button>
+                </div>
+              );
+            })()}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, margin: "12px 16px 0" }}>
               {currentFolders.map(tab => {
                 const isActive = folder === tab.key;

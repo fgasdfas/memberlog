@@ -1928,7 +1928,18 @@ export default function App() {
                         ) : (
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: 11, color: "#555", marginBottom: 6 }}>{formatDate(d.date)}</div>
+                              <div style={{ fontSize: 11, color: "#555", marginBottom: 6 }}>
+                                {formatDate(d.date)}
+                                {d.updatedAt && (() => {
+                                  try {
+                                    const t = d.updatedAt?.toDate ? d.updatedAt.toDate() : new Date(d.updatedAt);
+                                    if (isNaN(t.getTime())) return null;
+                                    const hh = String(t.getHours()).padStart(2, "0");
+                                    const mm = String(t.getMinutes()).padStart(2, "0");
+                                    return <span style={{ marginLeft: 6, color: "#444" }}>{hh}:{mm}</span>;
+                                  } catch (e) { return null; }
+                                })()}
+                              </div>
                               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 }}>
                                 {[
                                   { value: d.weight, unit: "kg", color: "#4ECDC4" },

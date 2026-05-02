@@ -1737,20 +1737,32 @@ export default function App() {
                       <p style={{ margin: 0, fontSize: 13, color: "#888" }}>📈 변화 추이</p>
                       {(() => {
                         const last = inbodyData[inbodyData.length - 1];
+                        const prev = inbodyData.length >= 2 ? inbodyData[inbodyData.length - 2] : null;
                         if (!last) return null;
+                        const renderDiff = (key) => {
+                          if (!prev || prev[key] == null || last[key] == null) return null;
+                          const d = Math.round((last[key] - prev[key]) * 10) / 10;
+                          if (d === 0) return <span style={{ color: "#666", fontSize: 9, marginLeft: 4 }}>·</span>;
+                          const isDown = d < 0;
+                          // 체중·체지방률·체지방량은 ↓가 좋음(민트), 골격근량은 ↑가 좋음(민트)
+                          const goodWhenDown = key !== "골격근량";
+                          const positive = goodWhenDown ? isDown : !isDown;
+                          const color = positive ? "#4ECDC4" : "#FF9F43";
+                          return <span style={{ color, fontSize: 9, fontWeight: 700, marginLeft: 4 }}>{isDown ? "↓" : "↑"}{Math.abs(d)}</span>;
+                        };
                         return (
                           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                             {last.체중 != null && (
-                              <span style={{ background: "#0F1117", border: "1px solid #4ECDC444", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#4ECDC4" }}>{last.체중}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span></span>
+                              <span style={{ background: "#0F1117", border: "1px solid #4ECDC444", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#4ECDC4" }}>{last.체중}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span>{renderDiff("체중")}</span>
                             )}
                             {last.골격근량 != null && (
-                              <span style={{ background: "#0F1117", border: "1px solid #6BCB7744", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#6BCB77" }}>{last.골격근량}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span></span>
+                              <span style={{ background: "#0F1117", border: "1px solid #6BCB7744", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#6BCB77" }}>{last.골격근량}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span>{renderDiff("골격근량")}</span>
                             )}
                             {last.체지방률 != null && (
-                              <span style={{ background: "#0F1117", border: "1px solid #FF6B6B44", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#FF6B6B" }}>{last.체지방률}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>%</span></span>
+                              <span style={{ background: "#0F1117", border: "1px solid #FF6B6B44", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#FF6B6B" }}>{last.체지방률}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>%</span>{renderDiff("체지방률")}</span>
                             )}
                             {last.체지방량 != null && (
-                              <span style={{ background: "#0F1117", border: "1px solid #FFA50044", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#FFA500" }}>{last.체지방량}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span></span>
+                              <span style={{ background: "#0F1117", border: "1px solid #FFA50044", borderRadius: 6, padding: "3px 7px", fontSize: 11, fontWeight: 700, color: "#FFA500" }}>{last.체지방량}<span style={{ color: "#888", fontWeight: 500, marginLeft: 2, fontSize: 9 }}>kg</span>{renderDiff("체지방량")}</span>
                             )}
                           </div>
                         );

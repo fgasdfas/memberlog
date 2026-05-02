@@ -104,6 +104,14 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem("mlViewedMap") || "{}"); }
     catch (e) { return {}; }
   });
+
+  // 로그인된 트레이너의 Firestore viewedMap이 들어오면 동기화 (모든 기기 간 공유)
+  useEffect(() => {
+    if (currentUser?.viewedMap) {
+      setSeenMembers(currentUser.viewedMap);
+      try { localStorage.setItem("mlViewedMap", JSON.stringify(currentUser.viewedMap)); } catch (e) {}
+    }
+  }, [currentUser?.id, JSON.stringify(currentUser?.viewedMap)]);
   const [newNote, setNewNote] = useState("");
   const [noteDate, setNoteDate] = useState(today());
   const [editNotesMode, setEditNotesMode] = useState(false);
@@ -324,12 +332,13 @@ export default function App() {
     setShowMoveConfirm(false); setMoveTarget("");
     setShowInbodyAdd(false); setInbodyForm(emptyInbody());
     setActiveTab("record"); setSurvey(null); setShowSurveyDetail(false);
-    // 뱃지 확인 처리 — 이 회원의 마지막 확인 시각 기록
-    setSeenMembers(prev => {
-      const next = { ...prev, [m.id]: new Date().toISOString() };
-      try { localStorage.setItem("mlViewedMap", JSON.stringify(next)); } catch (e) {}
-      return next;
-    });
+    // 뱃지 확인 처리 — 이 회원의 마지막 확인 시각 기록 (모든 기기 동기화)
+    const newViewedMap = { ...seenMembers, [m.id]: new Date().toISOString() };
+    setSeenMembers(newViewedMap);
+    try { localStorage.setItem("mlViewedMap", JSON.stringify(newViewedMap)); } catch (e) {}
+    if (currentUser?.id) {
+      updateDoc(doc(db, "users", currentUser.id), { viewedMap: newViewedMap }).catch(() => {});
+    }
     // 설문지 불러오기
     getDoc(doc(db, "surveys", m.id)).then(snap => {
       if (snap.exists()) setSurvey(snap.data());

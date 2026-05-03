@@ -1220,6 +1220,16 @@ export default function App() {
                         설문 미제출
                       </span>
                     )}
+                    {/* 관리자 모드 ON일 때만, 다른 트레이너 회원이면 트레이너명 칩 표시 */}
+                    {isAdmin && adminMode && m.owner && m.owner !== currentUser?.id && (() => {
+                      const ownerUser = users.find(u => u.id === m.owner);
+                      const ownerName = ownerUser?.name || m.owner;
+                      return (
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#A78BFA22", color: "#A78BFA", border: "1px solid #A78BFA44" }}>
+                          👤 {ownerName}
+                        </span>
+                      );
+                    })()}
                     {(() => {
                       // 다이어트 목적 + 인바디 1회 이상 + 마지막 측정 14일 이상 경과 → 회색 배지
                       const isDiet = (m.purpose || []).includes("다이어트");

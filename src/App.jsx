@@ -1220,12 +1220,13 @@ export default function App() {
                         설문 미제출
                       </span>
                     )}
-                    {/* 관리자 모드 ON일 때만, 다른 트레이너 회원이면 트레이너명 칩 표시 */}
-                    {isAdmin && adminMode && m.owner && m.owner !== currentUser?.id && (() => {
+                    {/* 관리자 모드 ON일 때만, 모든 회원에 트레이너명 칩 표시 */}
+                    {isAdmin && adminMode && m.owner && (() => {
                       const ownerUser = users.find(u => u.id === m.owner);
                       const ownerName = ownerUser?.name || m.owner;
+                      const isMine = m.owner === currentUser?.id;
                       return (
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: "#A78BFA22", color: "#A78BFA", border: "1px solid #A78BFA44" }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6, background: isMine ? "#4ECDC422" : "#A78BFA22", color: isMine ? "#4ECDC4" : "#A78BFA", border: "1px solid " + (isMine ? "#4ECDC444" : "#A78BFA44") }}>
                           👤 {ownerName}
                         </span>
                       );
